@@ -479,4 +479,7 @@ Project notes and thoughts for Haden controller, an autonomous search program ex
 17.03.2026
 	1527: A serious attempt to bring this into the mainstream.
 	1758: Clunky but here in dotnet sdk9.0, away from framework.
+	1807: The Whirl survives in here. Moving it to the cross-platform library.
+	1826: Can Ideal contribute here?
+	1833: Branches 1 and 2 have been modeled. Makes sense given constructivist epistemology is too advanced for a light-seeking robot.
 	

@@ -99,6 +99,9 @@ All notable fixes in this repository should be documented here.
 - `docs/paper/light_seeker_branch12.tex`
   - Bug: branch-01/branch-02 tests revealed a mismatch between expected boredom timing, motivational exploration behavior, and numeric TD test expectations.
   - Behavior change: boredom is now emitted on the threshold cycle, motivation can explore unknown experiments when known outcomes are non-positive, TD expected values were corrected, and the LaTeX paper section now includes explicit statements of academic value and evaluation rationale.
+- `Haden.Tests/packages.config`
+  - Bug: stale legacy NuGet `packages.config` (targeting `.NET Framework 4.8`) remained after SDK-style migration and no longer matched test project dependency management.
+  - Behavior change: removed obsolete `packages.config`; test dependencies remain managed exclusively via `PackageReference` in `Haden.Tests.csproj`.
 
 ## Entry Template For Future Fixes
 

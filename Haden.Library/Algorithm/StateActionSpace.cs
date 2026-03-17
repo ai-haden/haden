@@ -8,7 +8,7 @@ namespace Haden.Library.Algorithm
         /// Gets the listof actions.
         /// </summary>
         /// <returns></returns>
-        public List<string> GetListofActions()
+        public virtual List<string> GetListofActions()
         { 
             return new List<string>(); 
         }
@@ -16,7 +16,7 @@ namespace Haden.Library.Algorithm
         /// Gets the listof states.
         /// </summary>
         /// <returns></returns>
-        public List<int> GetListofStates()
+        public virtual List<int> GetListofStates()
         {
             return new List<int>();
         }
@@ -25,7 +25,7 @@ namespace Haden.Library.Algorithm
         /// </summary>
         /// <param name="state">The state.</param>
         /// <returns></returns>
-        public List<string> GetEligibleActions(int state)
+        public virtual List<string> GetEligibleActions(int state)
         {
             return new List<string>();
         }

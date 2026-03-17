@@ -102,6 +102,18 @@ All notable fixes in this repository should be documented here.
 - `Haden.Tests/packages.config`
   - Bug: stale legacy NuGet `packages.config` (targeting `.NET Framework 4.8`) remained after SDK-style migration and no longer matched test project dependency management.
   - Behavior change: removed obsolete `packages.config`; test dependencies remain managed exclusively via `PackageReference` in `Haden.Tests.csproj`.
+- `Haden.Library/Algorithm/IdealEmbodiedLightSeeker.cs`
+- `Haden.Library/Algorithm/IdealEmbodiedDecisionTreeAdapter.cs`
+- `Haden.Tests/IdealEmbodiedDecisionTreeAdapterTests.cs`
+- `docs/paper/light_seeker_branch12.tex`
+- `README.md`
+  - Bug: the new embodied branch-01/branch-02 model had no direct adapter into legacy `TreeNode` explainability output, and this path was not discoverable from the repository entry point.
+  - Behavior change: added a decision-tree export adapter for embodied interactions, exposed snapshot accessors on the embodied model, added adapter regression coverage, and documented usage in the main README and LaTeX paper section.
+- `Haden.Library/Algorithm/BaseLearner.cs`
+- `Haden.Library/Algorithm/StateActionSpace.cs`
+- `Haden.Tests/BaseLearnerTests.cs`
+  - Bug: `BaseLearner.GetNextAction` returned a character code from a policy string (`Policy[currentState][1]`) instead of a valid action id/index.
+  - Behavior change: action selection now resolves and returns the configured action index from the action space, with explicit errors for invalid policy mappings; `StateActionSpace` members are now virtual to support deterministic test stubs.
 
 ## Entry Template For Future Fixes
 

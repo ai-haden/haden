@@ -57,6 +57,23 @@ namespace Haden.Library.Algorithm
             _resultValence[resultLabel] = valence;
         }
 
+        public string[] GetExperiments()
+        {
+            string[] copy = new string[_experiments.Length];
+            Array.Copy(_experiments, copy, _experiments.Length);
+            return copy;
+        }
+
+        public Dictionary<string, string> GetLearnedInteractions()
+        {
+            return new Dictionary<string, string>(_memory);
+        }
+
+        public Dictionary<string, double> GetResultValenceMap()
+        {
+            return new Dictionary<string, double>(_resultValence);
+        }
+
         public EmbodiedStepTrace Step(Func<string, string> performExperiment)
         {
             string experiment = SelectExperiment();

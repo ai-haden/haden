@@ -47,7 +47,19 @@ namespace Haden.Library.Algorithm
         /// <returns></returns>
         public override int GetNextAction(int currentState)
         {
-            return Policy[currentState][1];
+            if (!Policy.ContainsKey(currentState))
+            {
+                throw new KeyNotFoundException("No policy entry exists for state " + currentState + ".");
+            }
+
+            string actionLabel = Policy[currentState];
+            int actionIndex = Actions.IndexOf(actionLabel);
+            if (actionIndex < 0)
+            {
+                throw new InvalidOperationException("Policy action '" + actionLabel + "' is not in the action space.");
+            }
+
+            return actionIndex;
         }
         /// <summary>
         /// Receives the reward.

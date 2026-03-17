@@ -38,7 +38,6 @@ namespace Haden.Library.Algorithm
                 var eligibleActions = ActionSpace.GetEligibleActions(state);
                 Policy[state] = eligibleActions[i % eligibleActions.Count];
             }
-            Console.WriteLine(this.Values);
         }
         /// <summary>
         /// Gets the next action.
@@ -82,31 +81,35 @@ namespace Haden.Library.Algorithm
         /// <remarks>Update policy greedily, in the basic example assuming equal transition probabilities.</remarks>
         public override void FinalizeEpisode(int[] currentStates, int[] nextActions)
         {
+            if (currentStates == null || currentStates.Length < 2)
+            {
+                throw new ArgumentException("currentStates must contain at least two entries.", nameof(currentStates));
+            }
+            if (nextActions == null || nextActions.Length < 2)
+            {
+                throw new ArgumentException("nextActions must contain at least two entries.", nameof(nextActions));
+            }
+
             var currentState = currentStates[0] + nextActions[0];
             var nextAction = currentStates[1] + nextActions[1];
             var nextStateDeterministic = currentState + nextAction;
-            try
+            foreach (var state in Policy.Keys)
             {
-                foreach (var state in Policy.Keys)
+                if (!Values.ContainsKey(nextStateDeterministic))
                 {
-                    //var current_next_value = Values[nextStateDeterministic(state, Policy[state])];
-                    var current_next_value = Values[nextStateDeterministic];
-                    // Find the best action.
-                    foreach (var action in ActionSpace.GetEligibleActions(state))
+                    throw new KeyNotFoundException("Expected deterministic next state '" + nextStateDeterministic + "' in Values.");
+                }
+
+                var current_next_value = Values[nextStateDeterministic];
+                foreach (var action in ActionSpace.GetEligibleActions(state))
+                {
+                    var value_of_next = Values[nextStateDeterministic];
+                    if (value_of_next >= current_next_value)
                     {
-                        // var value_of_next = Values[nextStateDeterministic(state, action)];
-                        var value_of_next = Values[nextStateDeterministic];
-                        if (value_of_next >= current_next_value)
-                        {
-                            Policy[state] = action;
-                            current_next_value = value_of_next;
-                        }
+                        Policy[state] = action;
+                        current_next_value = value_of_next;
                     }
                 }
-            }
-            catch (Exception)
-            {
-                //<parser-error>
             }
         }
     }

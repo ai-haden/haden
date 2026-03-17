@@ -120,6 +120,9 @@ All notable fixes in this repository should be documented here.
 - `Haden.Library/SettingsDictionary.cs`
   - Bug: medium-severity reliability issues remained in equality logic, mutable policy state exposure, and XML setting parse conditions.
   - Behavior change: `Equals` implementations now safely handle null/type mismatch, `Policy.StateSpace` is now get-only to reduce accidental replacement, and settings XML checks now use short-circuit `&&`.
+- `Haden.Library/Algorithm/BaseLearner.cs`
+  - Bug: `FinalizeEpisode` swallowed all exceptions and constructor emitted debug output to console, reducing diagnosability and causing noisy test output.
+  - Behavior change: removed debug console output, added input validation, and replaced exception swallowing with explicit deterministic-state validation errors.
 
 ## Entry Template For Future Fixes
 

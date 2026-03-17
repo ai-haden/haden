@@ -123,6 +123,9 @@ All notable fixes in this repository should be documented here.
 - `Haden.Library/Algorithm/BaseLearner.cs`
   - Bug: `FinalizeEpisode` swallowed all exceptions and constructor emitted debug output to console, reducing diagnosability and causing noisy test output.
   - Behavior change: removed debug console output, added input validation, and replaced exception swallowing with explicit deterministic-state validation errors.
+- `Haden.Library/SettingsDictionary.cs`
+  - Bug: settings-load failures threw generic exceptions without contextual path information, making diagnosis harder.
+  - Behavior change: settings load now throws explicit argument validation for blank paths and `FileNotFoundException` with the missing file path.
 
 ## Entry Template For Future Fixes
 

@@ -63,7 +63,7 @@ namespace Haden.Library
         /// <param name="pathToSettings">The file containing the settings.</param>
         public void LoadSettings(string pathToSettings)
         {
-            if (pathToSettings.Length > 0)
+            if (!string.IsNullOrWhiteSpace(pathToSettings))
             {
                 FileInfo fi = new FileInfo(pathToSettings);
                 if (fi.Exists)
@@ -74,12 +74,12 @@ namespace Haden.Library
                 }
                 else
                 {
-                    throw new FileNotFoundException();
+                    throw new FileNotFoundException("Settings file was not found.", pathToSettings);
                 }
             }
             else
             {
-                throw new FileNotFoundException();
+                throw new ArgumentException("Path to settings file cannot be null, empty, or whitespace.", nameof(pathToSettings));
             }
         }
         /// <summary>

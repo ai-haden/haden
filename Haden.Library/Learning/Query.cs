@@ -62,9 +62,19 @@ namespace Haden.Library
         /// </returns>
         public override bool Equals(object obj)
         {
-            Query that = (Query)obj;
-            return this.Feature.Equals(that.Feature)
-                && this.Label.Equals(that.Label);
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            Query that = obj as Query;
+            if (that == null)
+            {
+                return false;
+            }
+
+            return Equals(this.Feature, that.Feature)
+                && Equals(this.Label, that.Label);
         }
     }
 }

@@ -88,9 +88,19 @@ namespace Haden.Library
         /// </returns>
         public override bool Equals(object obj)
         {
-            FeatureValuePair that = (FeatureValuePair)obj;
-            return this.Name.Equals(that.Name)
-                && this.Value.Equals(that.Value);
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            FeatureValuePair that = obj as FeatureValuePair;
+            if (that == null)
+            {
+                return false;
+            }
+
+            return string.Equals(this.Name, that.Name, StringComparison.Ordinal)
+                && Equals(this.Value, that.Value);
         }
     }
 }

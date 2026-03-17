@@ -114,6 +114,12 @@ All notable fixes in this repository should be documented here.
 - `Haden.Tests/BaseLearnerTests.cs`
   - Bug: `BaseLearner.GetNextAction` returned a character code from a policy string (`Policy[currentState][1]`) instead of a valid action id/index.
   - Behavior change: action selection now resolves and returns the configured action index from the action space, with explicit errors for invalid policy mappings; `StateActionSpace` members are now virtual to support deterministic test stubs.
+- `Haden.Library/Learning/FeatureValuePair.cs`
+- `Haden.Library/Learning/Query.cs`
+- `Haden.Library/Learning/Policy.cs`
+- `Haden.Library/SettingsDictionary.cs`
+  - Bug: medium-severity reliability issues remained in equality logic, mutable policy state exposure, and XML setting parse conditions.
+  - Behavior change: `Equals` implementations now safely handle null/type mismatch, `Policy.StateSpace` is now get-only to reduce accidental replacement, and settings XML checks now use short-circuit `&&`.
 
 ## Entry Template For Future Fixes
 

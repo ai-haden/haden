@@ -98,9 +98,9 @@ namespace Haden.Library
 
                 foreach (XmlNode myNode in rootChildren)
                 {
-                    if (myNode.Attributes != null && (myNode.Name == "item") & (myNode.Attributes.Count == 2))
+                    if (myNode.Attributes != null && (myNode.Name == "item") && (myNode.Attributes.Count == 2))
                     {
-                        if ((myNode.Attributes[0].Name == "name") & (myNode.Attributes[1].Name == "value"))
+                        if ((myNode.Attributes[0].Name == "name") && (myNode.Attributes[1].Name == "value"))
                         {
                             string name = myNode.Attributes["name"].Value;
                             string value = myNode.Attributes["value"].Value;

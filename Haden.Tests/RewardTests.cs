@@ -30,13 +30,13 @@ namespace Haden.Tests
         // Reset the positon to the starting point, e.g., match the position to the first seen sensor value. Use variable TotalDegreesMoved to walk back.
         // Q: Have a limit in the form of the maximum turning radius in one direction (in degrees) such that the cable will become twisted around.
         [TestCase]
-        protected void CheckTemporalDifference()
+        public void CheckTemporalDifference()
         {
             
         }
         // The Action.
         [TestCase]
-        protected void SeekReward()
+        public void SeekReward()
         {
             
         }

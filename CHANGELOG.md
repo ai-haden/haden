@@ -82,6 +82,9 @@ All notable fixes in this repository should be documented here.
 - `Haden.Tests/SanityTests.cs`
   - Bug: hardware integration tests hardcoded `COM7` and failed on machines without that exact Bluetooth serial port mapping.
   - Behavior change: tests now select the first available COM port dynamically and skip with a clear message when no Bluetooth serial COM port is present.
+- `Haden.Tests/RewardTests.cs`
+  - Bug: NUnit test methods were non-public, causing discovery/execution failures (`Method is not public`).
+  - Behavior change: reward test methods are now public and discoverable by the .NET test runner.
 
 ## Entry Template For Future Fixes
 

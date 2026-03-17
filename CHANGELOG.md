@@ -94,6 +94,11 @@ All notable fixes in this repository should be documented here.
 - `docs/paper/light_seeker_branch12.tex`
   - Bug: branch-01/branch-02 concepts from `cartheur/ideal` were not explicitly encoded or paper-documented for the Haden light-seeker mission.
   - Behavior change: added an embodied-motivational light-seeker model, executable regression tests for boredom/motivation behavior, and a LaTeX section suitable for academic manuscript integration.
+- `Haden.Library/Algorithm/IdealEmbodiedLightSeeker.cs`
+- `Haden.Tests/RewardTests.cs`
+- `docs/paper/light_seeker_branch12.tex`
+  - Bug: branch-01/branch-02 tests revealed a mismatch between expected boredom timing, motivational exploration behavior, and numeric TD test expectations.
+  - Behavior change: boredom is now emitted on the threshold cycle, motivation can explore unknown experiments when known outcomes are non-positive, TD expected values were corrected, and the LaTeX paper section now includes explicit statements of academic value and evaluation rationale.
 
 ## Entry Template For Future Fixes
 

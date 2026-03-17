@@ -76,11 +76,12 @@ namespace Haden.Library.Algorithm
             }
 
             EmbodiedMood mood = ComputeMood(predicted, result);
-            _previousExperiment = experiment;
             if (mood == EmbodiedMood.SelfSatisfied && _selfSatisfactionStreak >= _boredomThreshold)
             {
+                mood = EmbodiedMood.Bored;
                 _boredOnNextStep = true;
             }
+            _previousExperiment = experiment;
 
             return new EmbodiedStepTrace(experiment, anticipatedResult, result, mood);
         }
@@ -100,12 +101,17 @@ namespace Haden.Library.Algorithm
         private string GetMotivatedExperiment()
         {
             string bestExperiment = null;
+            string firstUnknownExperiment = null;
             double bestValence = double.MinValue;
             foreach (string experiment in _experiments)
             {
                 string predicted = Predict(experiment);
                 if (predicted == null)
                 {
+                    if (firstUnknownExperiment == null)
+                    {
+                        firstUnknownExperiment = experiment;
+                    }
                     continue;
                 }
 
@@ -115,6 +121,12 @@ namespace Haden.Library.Algorithm
                     bestValence = valence;
                     bestExperiment = experiment;
                 }
+            }
+
+            // Branch-02 motivation: if known outcomes are non-positive, explore unknown experiments.
+            if (_resultValence.Count > 0 && firstUnknownExperiment != null && (bestExperiment == null || bestValence <= 0))
+            {
+                return firstUnknownExperiment;
             }
 
             return bestExperiment;
@@ -135,11 +147,6 @@ namespace Haden.Library.Algorithm
             if (valence < 0)
             {
                 return EmbodiedMood.Pained;
-            }
-
-            if (_boredOnNextStep)
-            {
-                return EmbodiedMood.Bored;
             }
 
             return predicted ? EmbodiedMood.SelfSatisfied : EmbodiedMood.Frustrated;

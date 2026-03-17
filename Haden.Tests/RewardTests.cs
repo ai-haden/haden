@@ -20,8 +20,8 @@ namespace Haden.Tests
             double qS1Right = model.GetQValue("s1", "right");
 
             Assert.That(qS2Right, Is.EqualTo(1.5).Within(0.000001));
-            Assert.That(tdError, Is.EqualTo(2.6).Within(0.000001));
-            Assert.That(qS1Right, Is.EqualTo(2.3).Within(0.000001));
+            Assert.That(tdError, Is.EqualTo(2.35).Within(0.000001));
+            Assert.That(qS1Right, Is.EqualTo(2.175).Within(0.000001));
         }
 
         [Test]

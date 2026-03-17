@@ -65,6 +65,16 @@ All notable fixes in this repository should be documented here.
 - `Haden.NxtRemote/Forms/HadenManualControl.cs`
   - Bug: whirl timer callback performed UI and state updates from a timer thread, invoked action evaluation multiple times per tick, and did not stop/dispose on disconnect or exit.
   - Behavior change: whirl ticks now marshal to the UI thread, evaluate action state once per cycle, and the timer is now stopped/disposed when restarting, disconnecting, exiting, or closing the form.
+- `Haden.Library/WhirlEngine.cs`
+- `Haden.NxtRemote/Forms/HadenManualControl.cs`
+- `Haden.NxtSharp/RueTheWhirl.cs`
+- `Haden.NxtSharp/Haden.NxtSharp.csproj`
+- `Haden.NxtRemote/Data/Controller.cs`
+  - Bug: whirl state-machine and action logic was spread across UI and `Haden.NxtSharp`, making behavior ownership fragmented.
+  - Behavior change: primary whirl state/action logic now lives in `Haden.Library.WhirlEngine`; form code consumes library tick results, and `RueTheWhirl` now acts as a compatibility wrapper over the shared engine.
+- `Haden.Tests/WhirlEngineTests.cs`
+  - Bug: no focused regression test existed for whirl state transitions and seek-window behavior tied to autonomous light-seeking mission flow.
+  - Behavior change: added deterministic unit tests validating transition order, seek-phase signaling, and a mission-style brightest-light acquisition simulation.
 
 ## Entry Template For Future Fixes
 

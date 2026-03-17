@@ -7,7 +7,7 @@ namespace Haden.NXTRemote.Data
 {
     //public enum Actions { Apriori = "a", Aposteriori = "aposteriori" }
     /// <summary>
-    /// The controller designed to be used with <see cref="RueTheWhirl"/>.
+    /// The controller designed to be used with <see cref="WhirlEngine"/>.
     /// </summary>
     public class Controller
     {

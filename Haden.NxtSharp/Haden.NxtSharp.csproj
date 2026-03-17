@@ -18,4 +18,8 @@
   <ItemGroup>
     <PackageReference Include="System.IO.Ports" Version="9.0.0" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Haden.Library\Haden.Library.csproj" />
+  </ItemGroup>
 </Project>

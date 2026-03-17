@@ -26,6 +26,7 @@ namespace Haden.NXTRemote.Forms
     {
         private System.Timers.Timer _whirlTimer;
         private Controller _controller;
+        private readonly WhirlEngine _whirlEngine = new WhirlEngine();
 
         public Session Session { get; }
         public SettingsDictionary GlobalSettings { get; set; }
@@ -215,8 +216,8 @@ namespace Haden.NXTRemote.Forms
             _whirlTimer.Elapsed += WhirlTimerElapsed;
             _whirlTimer.Start(); // Start timer.
             WhirlActive = true;
-            RueTheWhirl.CurrentState = "Zero"; // Start the whirl.
-            reportLabel.Text = RueTheWhirl.ActionController(); // Set the action for the whirl.
+            _whirlEngine.Reset();
+            reportLabel.Text = _whirlEngine.GetCurrentTick().Action;
         }
         protected void WhirlTimerElapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
@@ -232,28 +233,9 @@ namespace Haden.NXTRemote.Forms
                     return;
                 }
 
-                switch (RueTheWhirl.CurrentState)
-                {
-                    case "Zero":
-                        RueTheWhirl.CurrentState = "One";
-                        break;
-                    case "One":
-                        RueTheWhirl.CurrentState = "Two";
-                        break;
-                    case "Two":
-                        RueTheWhirl.CurrentState = "Three";
-                        break;
-                    case "Three":
-                        RueTheWhirl.CurrentState = "Four";
-                        break;
-                    case "Four":
-                        RueTheWhirl.CurrentState = "Zero";
-                        break;
-                }
-
-                string action = RueTheWhirl.ActionController();
-                reportLabel.Text = action;
-                if (action.Contains("Discover", StringComparison.Ordinal))
+                WhirlTickResult tick = _whirlEngine.AdvanceTick();
+                reportLabel.Text = tick.Action;
+                if (tick.ShouldSeekLight)
                 {
                     // At these points in the whirl-cycle, run the light-seeking routine.
                     PeekValue();
@@ -827,7 +809,7 @@ namespace Haden.NXTRemote.Forms
 
             disconnectBrickButton.Enabled = true;
             connectBrickButton.Enabled = false;
-            RueTheWhirl.ConnectedHaden = true;
+            _whirlEngine.ConnectedHaden = true;
             IsConnectedBrickAutonomous = true;
             dummyModeButton.Enabled = false;
             IsConnectedBrickDummy = false;
@@ -843,7 +825,7 @@ namespace Haden.NXTRemote.Forms
 
             connectBrickButton.Enabled = true;
             IsConnectedBrickAutonomous = false;
-            RueTheWhirl.ConnectedHaden = false;
+            _whirlEngine.ConnectedHaden = false;
             dummyModeButton.Enabled = true;
             IsConnectedBrickDummy = false;
             disconnectBrickButton.Enabled = false;
@@ -885,7 +867,7 @@ namespace Haden.NXTRemote.Forms
             disconnectBrickButton.Enabled = true;
             connectBrickButton.Enabled = false;
             IsConnectedBrickAutonomous = false;
-            RueTheWhirl.ConnectedHaden = false;
+            _whirlEngine.ConnectedHaden = false;
             dummyModeButton.Enabled = false;
             IsConnectedBrickDummy = true;
         }

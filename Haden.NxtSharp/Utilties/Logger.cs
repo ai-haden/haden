@@ -36,6 +36,18 @@ namespace Haden.NxtSharp.Utilties
         /// Occurs when [returned to console] is called.
         /// </summary>
         public static event LoggingDelegate ReturnedToConsole;
+
+        private static StreamWriter OpenWriter(string relativePath)
+        {
+            string fullPath = Path.Combine(FilePath(), relativePath);
+            string directory = Path.GetDirectoryName(fullPath);
+            if (!string.IsNullOrEmpty(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            return new StreamWriter(fullPath, true);
+        }
         /// <summary>
         /// Logs a message sent from the calling application to a file.
         /// </summary>
@@ -46,7 +58,7 @@ namespace Haden.NxtSharp.Utilties
         public static void WriteLog(string message, LogType logType, LogCaller caller, string method)
         {
             LastMessage = message;
-            StreamWriter stream = new StreamWriter(FilePath() + @"\logs\logfile.txt", true);
+            StreamWriter stream = OpenWriter(@"logs\logfile.txt");
             switch (logType)
             {
                 case LogType.Error:
@@ -74,7 +86,7 @@ namespace Haden.NxtSharp.Utilties
         public static void WriteLog(string message, LogType logType, LogCaller caller)
         {
             LastMessage = message;
-            StreamWriter stream = new StreamWriter(FilePath() + @"\logs\logfile.txt", true);
+            StreamWriter stream = OpenWriter(@"logs\logfile.txt");
             switch (logType)
             {
                 case LogType.Error:
@@ -101,7 +113,7 @@ namespace Haden.NxtSharp.Utilties
         public static void WriteLog(string message, LogType logType)
         {
             LastMessage = message;
-            StreamWriter stream = new StreamWriter(FilePath() + @"\logs\logfile.txt", true);
+            StreamWriter stream = OpenWriter(@"logs\logfile.txt");
             switch (logType)
             {
                 case LogType.Error:
@@ -128,7 +140,7 @@ namespace Haden.NxtSharp.Utilties
         {
             try
             {
-                StreamWriter stream = new StreamWriter(FilePath() + @"\logs\voiceTranscript.txt", true);
+                StreamWriter stream = OpenWriter(@"logs\voiceTranscript.txt");
                 stream.WriteLine(DateTime.Now + " - " + message);
                 stream.Close();
             }
@@ -146,7 +158,7 @@ namespace Haden.NxtSharp.Utilties
         {
             try
             {
-                StreamWriter stream = new StreamWriter(FilePath() + @"\db\AnimalAnalytics.txt", true);
+                StreamWriter stream = OpenWriter(@"db\AnimalAnalytics.txt");
                 stream.WriteLine(DateTime.Now + " - " + output);
                 stream.Close();
             }
@@ -164,7 +176,7 @@ namespace Haden.NxtSharp.Utilties
         {
             try
             {
-                StreamWriter stream = new StreamWriter(FilePath() + @"\db\AnimalAnalyticsStorage.txt", true);
+                StreamWriter stream = OpenWriter(@"db\AnimalAnalyticsStorage.txt");
                 stream.WriteLine("#" + DateTime.Now + ";" + output);
                 stream.Close();
             }
@@ -180,7 +192,7 @@ namespace Haden.NxtSharp.Utilties
         /// <param name="objects">The objects.</param>
         public static void Debug(params object[] objects)
         {
-            StreamWriter stream = new StreamWriter(FilePath() + @"\logs\logfile.txt", true);
+            StreamWriter stream = OpenWriter(@"logs\logfile.txt");
             foreach (object obj in objects)
             {
                 stream.WriteLine(obj);

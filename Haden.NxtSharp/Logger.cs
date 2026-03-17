@@ -34,6 +34,18 @@ namespace Haden.NxtSharp
         /// Occurs when [returned to console] is called.
         /// </summary>
         public static event LoggingDelegate ReturnedToConsole;
+
+        private static StreamWriter OpenWriter(string relativePath)
+        {
+            string fullPath = Path.Combine(FilePath, relativePath);
+            string directory = Path.GetDirectoryName(fullPath);
+            if (!string.IsNullOrEmpty(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            return new StreamWriter(fullPath, true);
+        }
         /// <summary>
         /// Records an event relevant to the algorithm.
         /// </summary>
@@ -43,7 +55,7 @@ namespace Haden.NxtSharp
         /// <param name="intervalNomen">The interval nomen, e.g., s, m, h.</param>
         public static void RecordEvent(DataPoints.EventDataPoint dataPoint, double eventData, int intervalPeriod, string intervalNomen)
         {
-            var stream = new StreamWriter(FilePath + @"\logs\monitor.txt", true);
+            var stream = OpenWriter(@"logs\monitor.txt");
             switch (dataPoint)
             {
                 case DataPoints.EventDataPoint.Compute:
@@ -67,7 +79,7 @@ namespace Haden.NxtSharp
         public static void WriteLog(string message, LogType logType, LogCaller caller)
         {
             LastMessage = message;
-            StreamWriter stream = new StreamWriter(FilePath + @"\logs\logfile.txt", true);
+            StreamWriter stream = OpenWriter(@"logs\logfile.txt");
             switch (logType)
             {
                 case LogType.Error:
@@ -99,7 +111,7 @@ namespace Haden.NxtSharp
         public static void WriteLog(string message, LogType logType, LogCaller caller, string method)
         {
             LastMessage = message;
-            StreamWriter stream = new StreamWriter(FilePath + @"\logs\logfile.txt", true);
+            StreamWriter stream = OpenWriter(@"logs\logfile.txt");
             switch (logType)
             {
                 case LogType.Error:
@@ -124,7 +136,7 @@ namespace Haden.NxtSharp
         public static void WriteLog(string message, LogType logType)
         {
             LastMessage = message;
-            StreamWriter stream = new StreamWriter(FilePath + @"\logs\logfile.txt", true);
+            StreamWriter stream = OpenWriter(@"logs\logfile.txt");
             switch (logType)
             {
                 case LogType.Error:
@@ -151,7 +163,7 @@ namespace Haden.NxtSharp
         {
             try
             {
-                StreamWriter stream = new StreamWriter(FilePath + @"\logs\transcript.txt", true);
+                StreamWriter stream = OpenWriter(@"logs\transcript.txt");
                 stream.WriteLine(DateTime.Now + " - " + message);
                 stream.Close();
             }
@@ -169,7 +181,7 @@ namespace Haden.NxtSharp
         {
             try
             {
-                StreamWriter stream = new StreamWriter(FilePath + @"\db\analytics.txt", true);
+                StreamWriter stream = OpenWriter(@"db\analytics.txt");
                 stream.WriteLine(DateTime.Now + " - " + output);
                 stream.Close();
             }
@@ -187,7 +199,7 @@ namespace Haden.NxtSharp
         {
             try
             {
-                StreamWriter stream = new StreamWriter(FilePath + @"\db\analyticsStorage.txt", true);
+                StreamWriter stream = OpenWriter(@"db\analyticsStorage.txt");
                 stream.WriteLine("#" + DateTime.Now + ";" + output);
                 stream.Close();
             }
@@ -203,7 +215,7 @@ namespace Haden.NxtSharp
         /// <param name="objects">The objects.</param>
         public static void Debug(params object[] objects)
         {
-            StreamWriter stream = new StreamWriter(FilePath + @"\logs\dump.txt", true);
+            StreamWriter stream = OpenWriter(@"logs\dump.txt");
             foreach (object obj in objects)
             {
                 stream.WriteLine(obj);

@@ -75,6 +75,13 @@ All notable fixes in this repository should be documented here.
 - `Haden.Tests/WhirlEngineTests.cs`
   - Bug: no focused regression test existed for whirl state transitions and seek-window behavior tied to autonomous light-seeking mission flow.
   - Behavior change: added deterministic unit tests validating transition order, seek-phase signaling, and a mission-style brightest-light acquisition simulation.
+- `Haden.NxtSharp/Utilties/Logger.cs`
+- `Haden.NxtSharp/Logger.cs`
+  - Bug: logging wrote to `logs`/`db` files without ensuring parent directories existed, causing runtime/test failures when output folders were fresh.
+  - Behavior change: logging now creates required parent directories automatically before opening output files.
+- `Haden.Tests/SanityTests.cs`
+  - Bug: hardware integration tests hardcoded `COM7` and failed on machines without that exact Bluetooth serial port mapping.
+  - Behavior change: tests now select the first available COM port dynamically and skip with a clear message when no Bluetooth serial COM port is present.
 
 ## Entry Template For Future Fixes
 

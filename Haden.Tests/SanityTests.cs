@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO.Ports;
 using System.Text;
 using System.Threading;
 using Haden.NxtSharp;
@@ -31,6 +32,7 @@ namespace Haden.Tests
         private NxtPressureSensor _nxtPressureSensor;
         private NxtMotorControl _nxtMotorControl;
         private NxtTankControl _nxtTankControl;
+        private string _testComPort;
 
         public object BoxedLastTurn;
         public object BoxedLastSeek;
@@ -89,7 +91,12 @@ namespace Haden.Tests
                 _nxtTankControl = new NxtTankControl();
                 // nxtBrick
                 _nxtBrick.AutoPoll = true;
-                _nxtBrick.ComPortName = "COM7";
+                var availablePorts = SerialPort.GetPortNames();
+                _testComPort = availablePorts.Length > 0 ? availablePorts[0] : null;
+                if (!string.IsNullOrEmpty(_testComPort))
+                {
+                    _nxtBrick.ComPortName = _testComPort;
+                }
                 _nxtBrick.MotorA = _nxtMotorA;
                 _nxtBrick.MotorB = _nxtMotorB;
                 _nxtBrick.MotorC = _nxtMotorC;
@@ -317,6 +324,11 @@ namespace Haden.Tests
         [TestCase(15)]
         public void StartAutonomy(int iterations)
         {
+            if (string.IsNullOrEmpty(_testComPort))
+            {
+                Assert.Ignore("No Bluetooth serial COM port detected. Pair the NXT brick and expose a COM port to run hardware integration tests.");
+            }
+
             IteratorLimit = iterations;
             if (!_nxtBrick.IsConnected)
             {
@@ -347,6 +359,11 @@ namespace Haden.Tests
         [Test]
         public void GetPowerLevel()
         {
+            if (string.IsNullOrEmpty(_testComPort))
+            {
+                Assert.Ignore("No Bluetooth serial COM port detected. Pair the NXT brick and expose a COM port to run hardware integration tests.");
+            }
+
             if (!_nxtBrick.IsConnected)
             {
                 _nxtBrick.Connect();

@@ -56,6 +56,12 @@ All notable fixes in this repository should be documented here.
 - `Haden.Library/HadenCore.cs`
   - Bug: core settings load also depended on `Environment.CurrentDirectory`, causing startup failure when launched from SDK-style output paths.
   - Behavior change: core settings load now prefers `AppContext.BaseDirectory/config/Settings.xml` with fallback to current directory.
+- `Haden.NxtRemote/Forms/HadenManualControl.cs`
+  - Bug: placeholder `hold` locals in light-event handlers were assigned but never used, producing compiler warnings.
+  - Behavior change: removed unused locals while preserving existing light-event placeholder branches.
+- `Haden.NxtRemote/Controls/LineWidthDialog.Designer.cs`
+  - Bug: designer field `CancelButton` hid `Form.CancelButton` implicitly, producing member-hiding warnings.
+  - Behavior change: made field hiding explicit with `new` to keep existing generated naming without warning noise.
 
 ## Entry Template For Future Fixes
 

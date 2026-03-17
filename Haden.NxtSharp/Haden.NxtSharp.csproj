@@ -6,7 +6,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <Deterministic>false</Deterministic>
-    <NoWarn>$(NoWarn);WFO1000</NoWarn>
+    <NoWarn>$(NoWarn);WFO1000;CA1416</NoWarn>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
   </PropertyGroup>

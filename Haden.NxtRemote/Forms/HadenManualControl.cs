@@ -714,8 +714,6 @@ namespace Haden.NXTRemote.Forms
             if (WhirlActive)
             {
                 // Add logic when haden responds to a light event and is intelligent.
-
-                var hold = 0;
             }
         }
 
@@ -731,8 +729,6 @@ namespace Haden.NXTRemote.Forms
             if (WhirlActive)
             {
                 // Add logic when haden responds to a light event and is intelligent.
-
-                var hold = 0;
             }
         }
         private void NxtPressureSensorPolled(NxtSensor sensor)

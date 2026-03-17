@@ -1,46 +1,50 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
-using Haden.NxtSharp;
-using Haden.NxtSharp.Brick;
-using Haden.NxtSharp.Controllers;
-using Haden.NxtSharp.Motors;
-using Haden.NxtSharp.Sensors;
-using Haden.NxtSharp.Utilties;
+using Haden.Library.Algorithm;
 using NUnit.Framework;
-using SpeechLib;
 
 namespace Haden.Tests
 {
     [TestFixture]
-    // Bring-over the esssence algorithm from TD Policy project to prepare it for use with haden.
     public class RewardTests
     {
-        #region The algorithm
-        // Criteria satisfaction (goal met --> reward received):
-        // Number of iterations to achieve the solution the measure of efficiency.
-        // To measure fitness, the algorithm can set the value of MotorDegrees from default.
-        // STEPS:
-        // Query the current sensor value.
-        // Send command to the motor to turn the sensor in order to explore if the next position yields a higher value.
-        //   -- If not, (you are moving away from the source intensity) turn in the opposite direction to see if the value is greater than the previous in this position.
-        //   -- When the current and peak value are equal for x iterations (IterationsUntilFoundSource), you have found the source.
-        // Report the number of iterations it took to reach the solution.
-        // Reset the positon to the starting point, e.g., match the position to the first seen sensor value. Use variable TotalDegreesMoved to walk back.
-        // Q: Have a limit in the form of the maximum turning radius in one direction (in degrees) such that the cable will become twisted around.
-        [TestCase]
+        [Test]
         public void CheckTemporalDifference()
         {
-            
-        }
-        // The Action.
-        [TestCase]
-        public void SeekReward()
-        {
-            
+            var model = new IdealReinforcementModel(learningRate: 0.5, discountFactor: 0.9, seed: 7);
+            string[] actions = { "left", "right" };
+
+            model.Update("s1", "right", reward: 2.0, nextState: "s2", nextActions: actions);
+            model.Update("s2", "right", reward: 3.0, nextState: "goal", nextActions: new string[0]);
+            double tdError = model.Update("s1", "right", reward: 2.0, nextState: "s2", nextActions: actions);
+
+            double qS2Right = model.GetQValue("s2", "right");
+            double qS1Right = model.GetQValue("s1", "right");
+
+            Assert.That(qS2Right, Is.EqualTo(1.5).Within(0.000001));
+            Assert.That(tdError, Is.EqualTo(2.6).Within(0.000001));
+            Assert.That(qS1Right, Is.EqualTo(2.3).Within(0.000001));
         }
 
-        #endregion
+        [Test]
+        public void SeekReward()
+        {
+            var model = new IdealReinforcementModel(learningRate: 0.3, discountFactor: 0.8, seed: 42);
+            string[] actions = { "left", "right" };
+            string state = "seek-light";
+
+            for (int i = 0; i < 400; i++)
+            {
+                string action = model.SelectAction(state, actions, epsilon: 0.10);
+                double reward = action == "right" ? 1.0 : -0.2;
+                model.Update(state, action, reward, state, actions);
+            }
+
+            string greedy = model.GetGreedyAction(state, actions);
+            double qLeft = model.GetQValue(state, "left");
+            double qRight = model.GetQValue(state, "right");
+
+            Assert.That(greedy, Is.EqualTo("right"));
+            Assert.That(qRight, Is.GreaterThan(qLeft));
+            Assert.That(qRight, Is.GreaterThan(2.5));
+        }
     }
 }

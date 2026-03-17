@@ -85,6 +85,10 @@ All notable fixes in this repository should be documented here.
 - `Haden.Tests/RewardTests.cs`
   - Bug: NUnit test methods were non-public, causing discovery/execution failures (`Method is not public`).
   - Behavior change: reward test methods are now public and discoverable by the .NET test runner.
+- `Haden.Library/Algorithm/IdealReinforcementModel.cs`
+- `Haden.Tests/RewardTests.cs`
+  - Bug: reward tests were placeholders and did not validate reinforcement-learning behavior for autonomous light-seeking.
+  - Behavior change: added an `ideal`-style deterministic tabular RL model and implemented assertions for TD updates plus policy convergence toward the higher-reward (brightest-source) action.
 
 ## Entry Template For Future Fixes
 

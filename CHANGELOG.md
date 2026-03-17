@@ -62,6 +62,9 @@ All notable fixes in this repository should be documented here.
 - `Haden.NxtRemote/Controls/LineWidthDialog.Designer.cs`
   - Bug: designer field `CancelButton` hid `Form.CancelButton` implicitly, producing member-hiding warnings.
   - Behavior change: made field hiding explicit with `new` to keep existing generated naming without warning noise.
+- `Haden.NxtRemote/Forms/HadenManualControl.cs`
+  - Bug: whirl timer callback performed UI and state updates from a timer thread, invoked action evaluation multiple times per tick, and did not stop/dispose on disconnect or exit.
+  - Behavior change: whirl ticks now marshal to the UI thread, evaluate action state once per cycle, and the timer is now stopped/disposed when restarting, disconnecting, exiting, or closing the form.
 
 ## Entry Template For Future Fixes
 

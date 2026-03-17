@@ -207,6 +207,7 @@ namespace Haden.NXTRemote.Forms
         #region The Novel Whirl
         protected void BeginToRueTheWhirl(double duration)
         {
+            StopWhirl();
             _whirlTimer = new System.Timers.Timer
             {
                 Interval = duration // Duration of time in each state (in ms)
@@ -219,49 +220,58 @@ namespace Haden.NXTRemote.Forms
         }
         protected void WhirlTimerElapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            switch (RueTheWhirl.CurrentState)
+            if (!WhirlActive || IsDisposed || !IsHandleCreated)
             {
-                case "Zero":
-                    RueTheWhirl.CurrentState = "One";
-                    reportLabel.Text = RueTheWhirl.ActionController();
-                    break;
-                case "One":
-                    RueTheWhirl.CurrentState = "Two";
-                    reportLabel.Text = RueTheWhirl.ActionController();
-                    break;
-                case "Two":
-                    RueTheWhirl.CurrentState = "Three";
-                    reportLabel.Text = RueTheWhirl.ActionController();
-                    break;
-                case "Three":
-                    RueTheWhirl.CurrentState = "Four";
-                    reportLabel.Text = RueTheWhirl.ActionController();
-                    break;
-                case "Four":
-                    RueTheWhirl.CurrentState = "Zero";
-                    reportLabel.Text = RueTheWhirl.ActionController();
-                    break;
-                default:
-                    break;
+                return;
             }
 
-            if (RueTheWhirl.ActionController().Contains("Discover") | RueTheWhirl.ActionController() == "Discover the peak value detected at a light sensor.")
+            BeginInvoke(new MethodInvoker(() =>
             {
-                // At those points in the whirl-cycle, we need a routine that brings life to this old toy robot.
-                // Based on the form of two wheel motors, one motor turning a light sensor through a range of 150-degrees, and a bump sensor.
-                //
-                // Tune to the changing value of light intensity.
-                // Better-yet: Follow a lamp left or right, as it is the brightest source.
-                //SensorTemporalValueDifference();
-                // Process taxonomy.
-                //ProcessTaxonomy();
-                // Start as a find of a peek.
-                PeekValue();
-                // Disturb equilibrium.
-                //IncrementLeft();
-                // Check the connection to the robot.
-                //QueryConnection();
+                if (!WhirlActive || IsDisposed)
+                {
+                    return;
+                }
+
+                switch (RueTheWhirl.CurrentState)
+                {
+                    case "Zero":
+                        RueTheWhirl.CurrentState = "One";
+                        break;
+                    case "One":
+                        RueTheWhirl.CurrentState = "Two";
+                        break;
+                    case "Two":
+                        RueTheWhirl.CurrentState = "Three";
+                        break;
+                    case "Three":
+                        RueTheWhirl.CurrentState = "Four";
+                        break;
+                    case "Four":
+                        RueTheWhirl.CurrentState = "Zero";
+                        break;
+                }
+
+                string action = RueTheWhirl.ActionController();
+                reportLabel.Text = action;
+                if (action.Contains("Discover", StringComparison.Ordinal))
+                {
+                    // At these points in the whirl-cycle, run the light-seeking routine.
+                    PeekValue();
+                }
+            }));
+        }
+        private void StopWhirl()
+        {
+            WhirlActive = false;
+            if (_whirlTimer == null)
+            {
+                return;
             }
+
+            _whirlTimer.Stop();
+            _whirlTimer.Elapsed -= WhirlTimerElapsed;
+            _whirlTimer.Dispose();
+            _whirlTimer = null;
         }
 
         #endregion
@@ -827,6 +837,7 @@ namespace Haden.NXTRemote.Forms
         }
         private void DisconnectBrickButtonClick(object sender, EventArgs e)
         {
+            StopWhirl();
             valLight.Value = 0;
             statusLabel.Text = Resources.HadenControlForm_Robot_disconnected;
 
@@ -905,6 +916,7 @@ namespace Haden.NXTRemote.Forms
         }
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            StopWhirl();
             _voice.Speak("Exiting haden remote, goodbye.", SpeechVoiceSpeakFlags.SVSFDefault);
             if (disconnectBrickButton.Enabled)
                 nxtBrick.Disconnect();
@@ -997,6 +1009,7 @@ namespace Haden.NXTRemote.Forms
         }
         private void OnFormClosing(object sender, FormClosingEventArgs e)
         {
+            StopWhirl();
             // Print statistics in lieu of saving them in a database for later analysis.
             //MessageBox.Show(TurnsMade.ToString(), "Statistics of the run", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }

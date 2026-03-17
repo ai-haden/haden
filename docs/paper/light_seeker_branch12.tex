@@ -1,0 +1,63 @@
+\section{Embodied-Motivational Architecture for Autonomous Light Seeking}
+\label{sec:embodied_motivational_light_seeker}
+
+\subsection{Scope}
+This section operationalizes two foundational branches from \texttt{cartheur/ideal} for a Bluetooth-connected mobile robot tasked with seeking the brightest light source:
+\begin{enumerate}
+\item \textbf{01-embodied-paradigm}: cognition is organized around \textit{experiment $\rightarrow$ result} interactions instead of passive world-state observation.
+\item \textbf{02-interactional-motivation}: interaction outcomes are assigned valence, shaping future experiment selection.
+\end{enumerate}
+
+\subsection{Formalization}
+Let $\mathcal{E}$ be a finite set of experiments (e.g., \texttt{scan-left}, \texttt{scan-right}) and $\mathcal{R}$ be a finite set of results (e.g., \texttt{dark}, \texttt{bright}).
+At cycle $t$, the agent executes:
+\begin{equation}
+e_t \in \mathcal{E}, \quad r_t = f(e_t)
+\end{equation}
+where $f$ is the embodied environment coupling.
+
+The agent stores primitive interactions:
+\begin{equation}
+I_t = \langle e_t, r_t \rangle
+\end{equation}
+and predicts anticipated result $\hat{r}(e)$ from memory.
+
+Motivational valence is modeled as:
+\begin{equation}
+v: \mathcal{R} \rightarrow \mathbb{R}
+\end{equation}
+with $v(\texttt{bright}) > 0$ and $v(\texttt{dark}) < 0$ for this mission.
+
+The action-selection rule is:
+\begin{equation}
+e_{t+1} = \arg\max_{e \in \mathcal{E}} v(\hat{r}(e))
+\end{equation}
+when predictions are available, with a boredom-driven exploration fallback.
+
+\subsection{Implementation Mapping}
+The \texttt{haden} implementation introduces:
+\begin{itemize}
+\item \texttt{Haden.Library/Algorithm/IdealEmbodiedLightSeeker.cs}
+\item \texttt{Haden.Tests/IdealBranch12LightSeekerTests.cs}
+\end{itemize}
+
+The model tracks:
+\begin{enumerate}
+\item primitive interaction memory;
+\item anticipation correctness;
+\item mood transitions (\texttt{Frustrated}, \texttt{SelfSatisfied}, \texttt{Bored}, \texttt{Pleased}, \texttt{Pained});
+\item boredom-based exploration and valence-based exploitation.
+\end{enumerate}
+
+\subsection{Mission Interpretation}
+For the light-seeker mission, each scan-direction command is an experiment and each normalized light reading class is a result.
+The policy converges toward experiments anticipating positive-valence outcomes, operationalized as bright-source alignment.
+This framing supports both simulation and physical execution over Bluetooth serial transport without changing the core cognition loop.
+
+\subsection{Testable Claims}
+\begin{enumerate}
+\item The branch-01 embodied loop exhibits reproducible boredom-triggered experiment switching.
+\item The branch-02 motivational extension converges toward bright-result experiments under stable valence assignment.
+\end{enumerate}
+
+These claims are encoded as executable regression tests in \texttt{IdealBranch12LightSeekerTests}.

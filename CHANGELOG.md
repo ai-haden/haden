@@ -89,6 +89,11 @@ All notable fixes in this repository should be documented here.
 - `Haden.Tests/RewardTests.cs`
   - Bug: reward tests were placeholders and did not validate reinforcement-learning behavior for autonomous light-seeking.
   - Behavior change: added an `ideal`-style deterministic tabular RL model and implemented assertions for TD updates plus policy convergence toward the higher-reward (brightest-source) action.
+- `Haden.Library/Algorithm/IdealEmbodiedLightSeeker.cs`
+- `Haden.Tests/IdealBranch12LightSeekerTests.cs`
+- `docs/paper/light_seeker_branch12.tex`
+  - Bug: branch-01/branch-02 concepts from `cartheur/ideal` were not explicitly encoded or paper-documented for the Haden light-seeker mission.
+  - Behavior change: added an embodied-motivational light-seeker model, executable regression tests for boredom/motivation behavior, and a LaTeX section suitable for academic manuscript integration.
 
 ## Entry Template For Future Fixes
 

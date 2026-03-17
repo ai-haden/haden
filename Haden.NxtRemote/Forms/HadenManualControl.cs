@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Threading;
 using System.Windows.Forms;
 using System.Xml;
+using System.IO.Ports;
 using Haden.NXTRemote.Forms.Child;
 using Haden.NXTRemote.Forms.Simulation;
 using Haden.NXTRemote.Properties;
@@ -111,7 +112,9 @@ namespace Haden.NXTRemote.Forms
             MotorTurnGranularity = 20;
             disconnectBrickButton.Enabled = false;
             KeyPreview = true;
-            comPortSelectionBox.Text = "COM7";
+            var availablePorts = SerialPort.GetPortNames();
+            comPortSelectionBox.Text = availablePorts.Length > 0 ? availablePorts[0] : "COM7";
+            nxtBrick.ComPortName = comPortSelectionBox.Text;
             //LightValuesSeen = new List<double>();
             TurnsMade = new List<string>();
             Then = new List<double>();
@@ -337,7 +340,7 @@ namespace Haden.NXTRemote.Forms
                 }
                 return true;
             }
-            if (Iteration != 0 | Iteration != 1)
+            if (Iteration > 1)
             {
                 // Increment the iteration value (for data-parity with count).
                 StoreTrace("Iteration", Iteration.ToString());
@@ -425,14 +428,15 @@ namespace Haden.NXTRemote.Forms
                 {
                     StoreTrace("STUCK", "Last turn is empty, so I am stuck. Triggering a turn.");
                     IncrementLeft(30);
-                    Compare();
                 }
-                IncrementLeft(30);
+                else
+                {
+                    IncrementLeft(30);
+                }
                 GreaterNow = false;
                 LessNow = true;
                 StoreTrace("Greater State?", GreaterNow.ToString());
                 StoreTrace("Lesser State?", LessNow.ToString());
-                Compare();
             }
             if (CurrentValue.IsLessThan(Now)) // Means you are now seeing a higher value.
             {
@@ -457,6 +461,7 @@ namespace Haden.NXTRemote.Forms
             var diff = Math.Abs(CurrentValue - Now);
             BeginInvoke(new MethodInvoker(() => differenceLightSensorValue.Text = diff.ToString())); // d
             BeginInvoke(new MethodInvoker(() => Refresh()));
+            CurrentValue = Now;
 
         }
         void Act(string action)

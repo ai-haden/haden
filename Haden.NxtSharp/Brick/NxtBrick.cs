@@ -17,6 +17,7 @@ namespace Haden.NxtSharp.Brick
         delegate void NxtMotorEvent(NxtMotor motor);
         private Thread _pollThread;
         private List<NxtSensor> _pollList;
+        private volatile bool _stopPollingRequested;
         private NxtMotor _motorA;
         private NxtMotor _motorB;
         private NxtMotor _motorC;
@@ -444,6 +445,7 @@ namespace Haden.NxtSharp.Brick
             {
                 if (_pollThread == null)
                 {
+                    _stopPollingRequested = false;
                     _pollList = new List<NxtSensor>();
 
                     foreach (var sensor in ConnectedSensors())
@@ -470,12 +472,8 @@ namespace Haden.NxtSharp.Brick
             {
 				if(_pollThread != null)
                 {
-					_pollThread.Abort();
-					// Wait until the polling thread is stopped.
-					while(_pollThread.IsAlive)
-                    {
-						Thread.Sleep(100);
-					}
+                    _stopPollingRequested = true;
+                    _pollThread.Join(1000);
                     _pollThread = null;
 				}
 			}
@@ -487,10 +485,14 @@ namespace Haden.NxtSharp.Brick
         {
 			try
             {
-				while(true)
+				while(!_stopPollingRequested)
                 {
 					foreach(NxtSensor sensor in _pollList)
                     {
+                        if (_stopPollingRequested)
+                        {
+                            break;
+                        }
 						if(sensor.LastPollTimestamp + sensor.AutoPollDelay <= Functions.MilliSeconds())
                         {
 							sensor.Poll();
@@ -500,7 +502,10 @@ namespace Haden.NxtSharp.Brick
 					Thread.Sleep(0); // Allow context switch.
 				}
 			}
-			catch(ThreadAbortException) { }
+            catch (Exception ex)
+            {
+                Logging.WriteLog(ex.Message, Logging.LogType.Error, Logging.LogCaller.Brick);
+            }
 		}
 
 		#endregion

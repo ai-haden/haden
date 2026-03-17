@@ -99,7 +99,7 @@ namespace Haden.NxtSharp.Sensors
                 var previous = LastResult;
                 LastResult = Brick.Communicator.GetInputValues(Port);
                 OnPolled();
-                if (IsSensorReadingDifferent(previous, LastResult))
+                if (previous == null || IsSensorReadingDifferent(previous, LastResult))
                 {
                     OnValueChanged();
                 }

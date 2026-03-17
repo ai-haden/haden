@@ -24,7 +24,7 @@ namespace Haden.NXTRemote.Forms.Experimental
         private int _x, _y;
         protected Timer PollingTimer;
         // Step 0: Primitives
-        private readonly ContextMenu _linecmenu;
+        private readonly ContextMenuStrip _linecmenu;
         private Cuboid _station;// = new Cuboid(75, 75, 75);
         private Cuboid _robot;// = new Cuboid(50, 60, 45);
         private readonly Camera _cam = new Camera();
@@ -111,14 +111,14 @@ namespace Haden.NXTRemote.Forms.Experimental
             // Adds marks that are the beginning/end of the line.
             var mark1 = new MarkBox();
             mark1.Location = new Point(robot.X, robot.Y);
-            mark1.ContextMenu = _linecmenu;
+            mark1.ContextMenuStrip = _linecmenu;
             if (ActiveForm != null)
             {
                 ActiveForm.Controls.Add(mark1);
 
                 var mark2 = new MarkBox();
                 mark2.Location = new Point(station.X, station.Y);
-                mark2.ContextMenu = _linecmenu;
+                mark2.ContextMenuStrip = _linecmenu;
                 ActiveForm.Controls.Add(mark2);
 
                 // Line Struct contains the information for a single line.
@@ -307,14 +307,14 @@ namespace Haden.NXTRemote.Forms.Experimental
             // Adds marks that are the beginning/end of the line.
             var mark1 = new MarkBox();
             mark1.Location = new Point(x1, y1);
-            mark1.ContextMenu = _linecmenu;
+            mark1.ContextMenuStrip = _linecmenu;
             if (ActiveForm != null)
             {
                 ActiveForm.Controls.Add(mark1);
 
                 var mark2 = new MarkBox();
                 mark2.Location = new Point(x2, y2);
-                mark2.ContextMenu = _linecmenu;
+                mark2.ContextMenuStrip = _linecmenu;
                 ActiveForm.Controls.Add(mark2);
 
                 // Line Struct contains the information for a single line.

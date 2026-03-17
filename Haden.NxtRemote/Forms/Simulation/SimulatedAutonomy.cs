@@ -19,7 +19,7 @@ namespace Haden.NXTRemote.Forms.Simulation
         public int Iterator;
         private Form _owner;
         // Step 0: Primitives
-        private readonly ContextMenu _linecmenu;
+        private readonly ContextMenuStrip _linecmenu;
         private readonly Cuboid _station = new Cuboid(75, 75, 75);
         private readonly Cuboid _robot = new Cuboid(50, 60, 45);
         private readonly Camera _cam = new Camera();
@@ -90,14 +90,14 @@ namespace Haden.NXTRemote.Forms.Simulation
             // Adds marks that are the beginning/end of the line.
             MarkBox mark1 = new MarkBox();
             mark1.Location = new Point(400, 200);
-            mark1.ContextMenu = _linecmenu;
+            mark1.ContextMenuStrip = _linecmenu;
             if (ActiveForm != null)
             {
                 ActiveForm.Controls.Add(mark1);
 
                 MarkBox mark2 = new MarkBox();
                 mark2.Location = new Point(100, 60);
-                mark2.ContextMenu = _linecmenu;
+                mark2.ContextMenuStrip = _linecmenu;
                 ActiveForm.Controls.Add(mark2);
 
                 // Line Struct contains the information for a single line.
@@ -262,14 +262,14 @@ namespace Haden.NXTRemote.Forms.Simulation
             // Adds marks that are the beginning/end of the line.
             MarkBox mark1 = new MarkBox();
             mark1.Location = new Point(x1, y1);
-            mark1.ContextMenu = _linecmenu;
+            mark1.ContextMenuStrip = _linecmenu;
             if (ActiveForm != null)
             {
                 ActiveForm.Controls.Add(mark1);
 
                 MarkBox mark2 = new MarkBox();
                 mark2.Location = new Point(x2, y2);
-                mark2.ContextMenu = _linecmenu;
+                mark2.ContextMenuStrip = _linecmenu;
                 ActiveForm.Controls.Add(mark2);
 
                 // Line Struct contains the information for a single line.

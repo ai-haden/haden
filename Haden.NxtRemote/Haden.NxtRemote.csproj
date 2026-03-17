@@ -1,258 +1,46 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="12.0">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.50727</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{AB6A93E7-C3D3-4A80-B947-A94B2C0DFC6C}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <TargetFramework>net9.0-windows</TargetFramework>
     <RootNamespace>Haden.NXTRemote</RootNamespace>
     <AssemblyName>Haden.NXTRemote</AssemblyName>
+    <UseWindowsForms>true</UseWindowsForms>
     <ApplicationIcon>haden.ico</ApplicationIcon>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-    <FileUpgradeFlags>
-    </FileUpgradeFlags>
-    <UpgradeBackupLocation>
-    </UpgradeBackupLocation>
-    <OldToolsVersion>2.0</OldToolsVersion>
-    <IsWebBootstrapper>true</IsWebBootstrapper>
-    <PublishUrl>http://localhost/Haden.NXTRemote/</PublishUrl>
-    <Install>true</Install>
-    <InstallFrom>Web</InstallFrom>
-    <UpdateEnabled>true</UpdateEnabled>
-    <UpdateMode>Foreground</UpdateMode>
-    <UpdateInterval>7</UpdateInterval>
-    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
-    <UpdatePeriodically>false</UpdatePeriodically>
-    <UpdateRequired>false</UpdateRequired>
-    <MapFileExtensions>true</MapFileExtensions>
-    <SupportUrl>http://cartheur.com/support</SupportUrl>
-    <TargetCulture>en-US</TargetCulture>
-    <ProductName>NXT %27haden%27 controller and autonomy simulator</ProductName>
-    <PublisherName>Cartheur Robotics</PublisherName>
-    <ApplicationVersion>2.3.6.%2a</ApplicationVersion>
-    <BootstrapperEnabled>true</BootstrapperEnabled>
-    <TargetFrameworkProfile />
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <Deterministic>false</Deterministic>
+    <NoWarn>$(NoWarn);WFO1000</NoWarn>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="Interop.SpeechLib, Version=5.0.0.0, Culture=neutral, processorArchitecture=MSIL" />
     <Reference Include="NLua">
       <HintPath>..\..\..\aiventure-lua\nlua\lib\Debug\net48\NLua.dll</HintPath>
     </Reference>
     <Reference Include="SoftAgent">
       <HintPath>..\..\..\..\aiventure-automat\agent\soft\desktop\project\SoftAgent\bin\Debug\SoftAgent.dll</HintPath>
     </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Data" />
     <Reference Include="System.Data.SQLite">
       <HintPath>bin\Debug\x64\System.Data.SQLite.dll</HintPath>
     </Reference>
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="Controls\LineWidthDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Controls\LineWidthDialog.Designer.cs">
-      <DependentUpon>LineWidthDialog.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\CoordinatePositionEntryDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Controls\CoordinatePositionEntryDialog.Designer.cs">
-      <DependentUpon>CoordinatePositionEntryDialog.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\FlashButton.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Controls\FlashButton.Designer.cs">
-      <DependentUpon>FlashButton.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\MarkBox.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Controls\MarkBox.Designer.cs">
-      <DependentUpon>MarkBox.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Data\Controller.cs" />
-    <Compile Include="Forms\Child\YesNo.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\Child\YesNo.Designer.cs">
-      <DependentUpon>YesNo.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\Experimental\PaperAutonomy.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\Experimental\PaperAutonomy.Designer.cs">
-      <DependentUpon>PaperAutonomy.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\Simulation\SimulatedAutonomy.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\Simulation\SimulatedAutonomy.Designer.cs">
-      <DependentUpon>SimulatedAutonomy.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\Child\HadenAutonomousControl.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\Child\HadenAutonomousControl.Designer.cs">
-      <DependentUpon>HadenAutonomousControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Simulation\Drawing3D\Camera.cs" />
-    <Compile Include="Simulation\Drawing3D\Cuboid.cs" />
-    <Compile Include="Simulation\Drawing3D\Line.cs" />
-    <Compile Include="Simulation\Drawing3D\Point3D.cs" />
-    <Compile Include="Simulation\Drawing3D\Quaternion.cs" />
-    <Compile Include="Simulation\Drawing3D\Shape3D.cs" />
-    <Compile Include="Simulation\Drawing3D\Vector3D.cs" />
-    <Compile Include="Simulation\Drawing3D\Vector.cs" />
-    <Compile Include="Simulation\Imaging\Filters\FreeTransform.cs" />
-    <Compile Include="Simulation\Imaging\ImageData.cs" />
-    <Compile Include="Forms\Child\HadenAutonomySimulator.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\Child\HadenAutonomySimulator.Designer.cs">
-      <DependentUpon>HadenAutonomySimulator.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\HadenManualControl.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\HadenManualControl.Designer.cs">
-      <DependentUpon>HadenManualControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\Simulation\SimulatorMockup.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\Simulation\SimulatorMockup.Designer.cs">
-      <DependentUpon>SimulatorMockup.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Simulation\Plotting3D\Domino.cs" />
-    <Compile Include="Simulation\Plotting3D\Dominoes.cs" />
-    <Compile Include="Simulation\Plotting3D\MathematicsUtilities.cs" />
-    <Compile Include="Simulation\Plotting3D\Orientation3D.cs" />
-    <Compile Include="Simulation\Plotting3D\Plotter3D.cs" />
-    <Compile Include="Simulation\Plotting3D\Point3D.cs" />
-    <Compile Include="Simulation\Plotting3D\Vector3D.cs" />
-    <EmbeddedResource Include="Controls\CoordinatePositionEntryDialog.resx">
-      <SubType>Designer</SubType>
-      <DependentUpon>CoordinatePositionEntryDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Controls\LineWidthDialog.resx">
-      <SubType>Designer</SubType>
-      <DependentUpon>LineWidthDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\Child\YesNo.resx">
-      <DependentUpon>YesNo.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\Experimental\PaperAutonomy.resx">
-      <DependentUpon>PaperAutonomy.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\Simulation\SimulatedAutonomy.resx">
-      <SubType>Designer</SubType>
-      <DependentUpon>SimulatedAutonomy.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\Child\HadenAutonomousControl.resx">
-      <SubType>Designer</SubType>
-      <DependentUpon>HadenAutonomousControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\Child\HadenAutonomySimulator.resx">
-      <SubType>Designer</SubType>
-      <DependentUpon>HadenAutonomySimulator.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\Simulation\SimulatorMockup.resx">
-      <SubType>Designer</SubType>
-      <DependentUpon>SimulatorMockup.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\HadenManualControl.resx">
-      <SubType>Designer</SubType>
-      <DependentUpon>HadenManualControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-      <DesignTime>True</DesignTime>
-    </Compile>
+    <PackageReference Include="AeonVoice" Version="0.1.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Haden.Library\Haden.Library.csproj" />
+    <ProjectReference Include="..\Haden.NxtSharp\Haden.NxtSharp.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="app.config" />
-    <None Include="bin\Debug\data\hadenAutonomyData.db" />
-    <None Include="bin\Debug\lua\hello.lua" />
-    <None Include="Data\DB Browser for SQLite.lnk" />
-    <None Include="Data\hadenAutonomyData.db" />
-    <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-    </Compile>
   </ItemGroup>
+
   <ItemGroup>
-    <ProjectReference Include="..\Haden.Library\Haden.Library.csproj">
-      <Project>{224c5117-498a-4ff3-893f-d3007641fdc4}</Project>
-      <Name>Haden.Library</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Haden.NxtSharp\Haden.NxtSharp.csproj">
-      <Project>{54FF144D-C120-4BEC-BC25-185094AAA38C}</Project>
-      <Name>Haden.NxtSharp</Name>
-    </ProjectReference>
+    <Content Include="config\Settings.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
-  <ItemGroup>
-    <Content Include="bin\Debug\config\Settings.xml" />
-    <Content Include="bin\Debug\logs\logfile.txt" />
-    <Content Include="bin\Debug\logs\logfile_00.txt" />
-    <Content Include="bin\Debug\logs\dump.txt" />
-    <Content Include="bin\Debug\logs\monitor.txt" />
-    <Content Include="Data\nxtBrickPorts.png" />
-    <Content Include="haden.ico" />
-    <Content Include="Resources\haden.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 2.0</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
-  </ItemGroup>
-  <ItemGroup />
-  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>

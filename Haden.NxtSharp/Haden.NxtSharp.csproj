@@ -1,169 +1,21 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="12.0">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.50727</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{54FF144D-C120-4BEC-BC25-185094AAA38C}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <TargetFramework>net9.0-windows</TargetFramework>
     <RootNamespace>Haden.NxtSharp</RootNamespace>
     <AssemblyName>Haden.NxtSharp</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-    <FileUpgradeFlags>
-    </FileUpgradeFlags>
-    <UpgradeBackupLocation>
-    </UpgradeBackupLocation>
-    <OldToolsVersion>2.0</OldToolsVersion>
-    <TargetFrameworkProfile />
+    <UseWindowsForms>true</UseWindowsForms>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <Deterministic>false</Deterministic>
+    <NoWarn>$(NoWarn);WFO1000</NoWarn>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
-    <DocumentationFile>
-    </DocumentationFile>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.XML" />
+    <Compile Remove="Motors\NxtMotorElse.cs" />
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="Controllers\NxtMotorControlOrientation.cs" />
-    <Compile Include="Controllers\NxtMotorControlStopMode.cs" />
-    <Compile Include="Extensions.cs" />
-    <Compile Include="Logger.cs" />
-    <Compile Include="RueTheWhirl.cs" />
-    <Compile Include="Sensors\NxtCompassRegister.cs" />
-    <Compile Include="Sensors\NxtSonarRegister.cs" />
-    <Compile Include="Sensors\SensorEvent.cs" />
-    <Compile Include="Exceptions\AssertionFailedException.cs" />
-    <Compile Include="Utilties\Functions.cs" />
-    <Compile Include="Brick\NxtBrick.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Brick\NxtBrick.Designer.cs">
-      <DependentUpon>NxtBrick.cs</DependentUpon>
-    </Compile>
-    <Compile Include="BrickCommunicator.cs" />
-    <Compile Include="Sensors\NxtCompassSensor.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Sensors\NxtCompassSensor.Designer.cs">
-      <DependentUpon>NxtCompassSensor.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Sensors\NxtLightSensor.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Sensors\NxtLightSensor.Designer.cs">
-      <DependentUpon>NxtLightSensor.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Motors\NxtMotor.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Motors\NxtMotor.Designer.cs">
-      <DependentUpon>NxtMotor.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Controllers\NxtMotorControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Controllers\NxtMotorControl.Designer.cs">
-      <DependentUpon>NxtMotorControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Sensors\NxtSensor.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Sensors\NxtSensor.Designer.cs">
-      <DependentUpon>NxtSensor.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Sensors\NxtSonar.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Sensors\NxtSonar.Designer.cs">
-      <DependentUpon>NxtSonar.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Sensors\NxtSoundSensor.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Sensors\NxtSoundSensor.Designer.cs">
-      <DependentUpon>NxtSoundSensor.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Sensors\NxtPressureSensor.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Sensors\NxtPressureSensor.Designer.cs">
-      <DependentUpon>NxtPressureSensor.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Controllers\NxtTankControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Controllers\NxtTankControl.Designer.cs">
-      <DependentUpon>NxtTankControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Controllers\NxtTankDrive.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Controllers\NxtTankDrive.Designer.cs">
-      <DependentUpon>NxtTankDrive.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Exceptions\NxtChannelBusyException.cs" />
-    <Compile Include="Command\NxtCommand.cs" />
-    <Compile Include="Command\NxtCommandType.cs" />
-    <Compile Include="Exceptions\NxtCommunicationBusErrorException.cs" />
-    <Compile Include="Brick\NxtGetInputValues.cs" />
-    <Compile Include="Brick\NxtGetOutputState.cs" />
-    <Compile Include="Brick\NxtMessageResult.cs" />
-    <Compile Include="Motors\NxtMotorMode.cs" />
-    <Compile Include="Motors\NxtMotorPort.cs" />
-    <Compile Include="Motors\NxtMotorRegulationMode.cs" />
-    <Compile Include="Motors\NxtMotorRunState.cs" />
-    <Compile Include="Sensors\NxtSensorMode.cs" />
-    <Compile Include="Sensors\NxtSensorPort.cs" />
-    <Compile Include="Sensors\NxtSensorType.cs" />
-    <Compile Include="Utilties\StaticRandom.cs" />
-    <Compile Include="DataPoints.cs" />
+    <PackageReference Include="System.IO.Ports" Version="9.0.0" />
   </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Brick\NxtBrick.resx">
-      <SubType>Designer</SubType>
-      <DependentUpon>NxtBrick.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Controllers\NxtMotorControl.resx">
-      <SubType>Designer</SubType>
-      <DependentUpon>NxtMotorControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Controllers\NxtTankControl.resx">
-      <SubType>Designer</SubType>
-      <DependentUpon>NxtTankControl.cs</DependentUpon>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup />
-  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>

@@ -30,11 +30,11 @@ namespace Haden.NXTRemote.Forms.Experimental
         {
             this.closeButton = new System.Windows.Forms.Button();
             this.drawButton = new System.Windows.Forms.Button();
-            this.linecmenu = new System.Windows.Forms.ContextMenu();
-            this.NewLine = new System.Windows.Forms.MenuItem();
-            this.LineWidth = new System.Windows.Forms.MenuItem();
-            this.Report = new System.Windows.Forms.MenuItem();
-            this.Delete = new System.Windows.Forms.MenuItem();
+            this.linecmenu = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.NewLine = new System.Windows.Forms.ToolStripMenuItem();
+            this.LineWidth = new System.Windows.Forms.ToolStripMenuItem();
+            this.Report = new System.Windows.Forms.ToolStripMenuItem();
+            this.Delete = new System.Windows.Forms.ToolStripMenuItem();
             this.castRayButton = new System.Windows.Forms.Button();
             this.findStationButton = new System.Windows.Forms.Button();
             this.stopButton = new System.Windows.Forms.Button();
@@ -67,7 +67,7 @@ namespace Haden.NXTRemote.Forms.Experimental
             // 
             // linecmenu
             // 
-            this.linecmenu.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+            this.linecmenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.NewLine,
             this.LineWidth,
             this.Report,
@@ -75,25 +75,21 @@ namespace Haden.NXTRemote.Forms.Experimental
             // 
             // NewLine
             // 
-            this.NewLine.Index = 0;
             this.NewLine.Text = "New";
             this.NewLine.Click += new System.EventHandler(this.NewLine_Click);
             // 
             // LineWidth
             // 
-            this.LineWidth.Index = 1;
             this.LineWidth.Text = "Width";
             this.LineWidth.Click += new System.EventHandler(this.Width_Click);
             // 
             // Report
             // 
-            this.Report.Index = 2;
             this.Report.Text = "Report coordinates";
             this.Report.Click += new System.EventHandler(this.Report_Click);
             // 
             // Delete
             // 
-            this.Delete.Index = 3;
             this.Delete.Text = "Delete";
             this.Delete.Click += new System.EventHandler(this.Delete_Click);
             // 
@@ -195,11 +191,11 @@ namespace Haden.NXTRemote.Forms.Experimental
 
         private System.Windows.Forms.Button closeButton;
         private System.Windows.Forms.Button drawButton;
-        private System.Windows.Forms.ContextMenu linecmenu;
-        private System.Windows.Forms.MenuItem LineWidth;
-        private System.Windows.Forms.MenuItem Delete;
-        private System.Windows.Forms.MenuItem NewLine;
-        private System.Windows.Forms.MenuItem Report;
+        private System.Windows.Forms.ContextMenuStrip linecmenu;
+        private System.Windows.Forms.ToolStripMenuItem LineWidth;
+        private System.Windows.Forms.ToolStripMenuItem Delete;
+        private System.Windows.Forms.ToolStripMenuItem NewLine;
+        private System.Windows.Forms.ToolStripMenuItem Report;
         private System.Windows.Forms.Button castRayButton;
         private System.Windows.Forms.Button findStationButton;
         private Haden.NXTRemote.Controls.FlashButton seekRightIndicator;

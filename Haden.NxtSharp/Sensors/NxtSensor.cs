@@ -8,6 +8,7 @@ namespace Haden.NxtSharp.Sensors
     public partial class NxtSensor : Component
     {
         int _autoPollDelay = 100;
+        bool _hasResult;
         /// <summary>
         /// Initializes a new instance of the <see cref="NxtSensor"/> class.
         /// </summary>
@@ -96,10 +97,12 @@ namespace Haden.NxtSharp.Sensors
             if (Brick != null)
             {
                 LastPollTimestamp = Functions.MilliSeconds();
+                var hasPrevious = _hasResult;
                 var previous = LastResult;
                 LastResult = Brick.Communicator.GetInputValues(Port);
+                _hasResult = true;
                 OnPolled();
-                if (previous == null || IsSensorReadingDifferent(previous, LastResult))
+                if (!hasPrevious || IsSensorReadingDifferent(previous, LastResult))
                 {
                     OnValueChanged();
                 }

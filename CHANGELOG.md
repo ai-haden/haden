@@ -18,6 +18,44 @@ All notable fixes in this repository should be documented here.
   - Removed recursive `Compare()` self-calls that could lead to uncontrolled loops.
   - Updated state progression by assigning `CurrentValue = Now` after compare pass.
   - Initialized COM port selection from detected serial ports (fallback to `COM7`) and propagated selection to `nxtBrick.ComPortName`.
+- `Haden.Library/Haden.Library.csproj`
+- `Haden.NxtSharp/Haden.NxtSharp.csproj`
+- `Haden.NxtRemote/Haden.NxtRemote.csproj`
+- `Haden.Tests/Haden.Tests.csproj`
+  - Bug: projects used legacy non-SDK .NET Framework 4.8 format, which blocked a direct .NET 9 SDK build workflow.
+  - Behavior change: all projects now use SDK-style project files targeting .NET 9 (`net9.0` / `net9.0-windows`) with updated test package references.
+- `Haden.NxtSharp/Sensors/NxtSensor.cs`
+  - Bug: sensor polling compared a value-type result (`NxtGetInputValues` struct) to `null`, which fails to compile under SDK-style .NET 9 build.
+  - Behavior change: polling now uses an explicit first-result flag to trigger `ValueChanged` on first poll and value deltas thereafter.
+- `Haden.NxtRemote/Haden.NxtRemote.csproj`
+- `Haden.NxtRemote/SpeechLibCompat.cs`
+  - Bug: `SpeechLib` COM reference (`Interop.SpeechLib`) was incompatible with the .NET 9 SDK migration path in this solution.
+  - Behavior change: speech calls now route through an in-project `SpeechLib` compatibility shim backed by `AeonVoice` (`SpVoice`/`SpeechVoiceSpeakFlags` preserved for existing form code).
+- `Haden.NxtRemote/Forms/Experimental/PaperAutonomy.cs`
+- `Haden.NxtRemote/Forms/Experimental/PaperAutonomy.Designer.cs`
+- `Haden.NxtRemote/Forms/Simulation/SimulatedAutonomy.cs`
+- `Haden.NxtRemote/Forms/Simulation/SimulatedAutonomy.Designer.cs`
+- `Haden.NxtRemote/Forms/Simulation/SimulatorMockup.cs`
+- `Haden.NxtRemote/Forms/HadenManualControl.cs`
+  - Bug: legacy WinForms menu APIs (`ContextMenu`, `MenuItem`, and `Control.ContextMenu`) failed compilation under the .NET 9 WinForms target.
+  - Behavior change: line-context menu wiring now uses `ContextMenuStrip`, `ToolStripMenuItem`, and `Control.ContextMenuStrip`.
+- `Haden.NxtRemote/Haden.NxtRemote.csproj`
+- `Haden.NxtRemote/Forms/HadenManualControl.cs`
+- `Haden.Tests/SanityTests.cs`
+  - Bug: .NET 9 migration introduced build blockers from WinForms analyzer `WFO1000` errors and ambiguous `Logging` type resolution (`Haden.NxtSharp.Logging` vs `Haden.NxtSharp.Utilties.Logging`).
+  - Behavior change: `Haden.NxtRemote` now suppresses `WFO1000` during migration, and both affected files now bind `Logging` explicitly to `Haden.NxtSharp.Utilties.Logging`.
+- `Haden.NxtRemote/Haden.NxtRemote.csproj`
+  - Bug: runtime startup failed because `config/Settings.xml` was not copied to the .NET 9 output folder (`bin/Debug/net9.0-windows/config`).
+  - Behavior change: `config/Settings.xml` is now copied to output on build, enabling `HadenManualControl` startup settings load.
+- `Haden.NxtRemote/config/Settings.xml`
+  - Bug: project-level settings source file was missing, causing copy-to-output to fail at build time.
+  - Behavior change: repository now includes the settings source file used for runtime configuration copy.
+- `Haden.NxtRemote/Forms/HadenManualControl.cs`
+  - Bug: default settings path used `Environment.CurrentDirectory`, which may not match the app output folder under .NET 9 run workflows.
+  - Behavior change: settings load now prefers `AppContext.BaseDirectory/config/Settings.xml` with fallback to current directory.
+- `Haden.Library/HadenCore.cs`
+  - Bug: core settings load also depended on `Environment.CurrentDirectory`, causing startup failure when launched from SDK-style output paths.
+  - Behavior change: core settings load now prefers `AppContext.BaseDirectory/config/Settings.xml` with fallback to current directory.
 
 ## Entry Template For Future Fixes
 

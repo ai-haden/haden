@@ -25,8 +25,15 @@ namespace Haden.Library
 
         public void LoadSettings()
         {
-            var path = Path.Combine(Environment.CurrentDirectory, Path.Combine("config", "Settings.xml"));
-            GlobalSettings.LoadSettings(path);
+            var primaryPath = Path.Combine(AppContext.BaseDirectory, "config", "Settings.xml");
+            if (File.Exists(primaryPath))
+            {
+                GlobalSettings.LoadSettings(primaryPath);
+                return;
+            }
+
+            var fallbackPath = Path.Combine(Environment.CurrentDirectory, "config", "Settings.xml");
+            GlobalSettings.LoadSettings(fallbackPath);
         }
     }
 }

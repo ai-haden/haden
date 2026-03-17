@@ -24,12 +24,12 @@ namespace Haden.NXTRemote.Forms
         public ArrayList Lines;
 
         #region Context menu (not presently used)
-        private readonly ContextMenu _linecmenu;
+        private readonly ContextMenuStrip _linecmenu;
         //private MenuItem LWidth;
         //private MenuItem Delete;
         #endregion
 
-        public SimulatorMockup(Form mOwner, ContextMenu linecmenu)
+        public SimulatorMockup(Form mOwner, ContextMenuStrip linecmenu)
         {
             InitializeComponent();
             _owner = mOwner;
@@ -79,14 +79,14 @@ namespace Haden.NXTRemote.Forms
             // Adds red marks that are the beginning/end of the line.
             MarkBox mark1 = new MarkBox();
             mark1.Location = new Point(50, 50);
-            mark1.ContextMenu = _linecmenu;
+            mark1.ContextMenuStrip = _linecmenu;
             if (ActiveForm != null)
             {
                 ActiveForm.Controls.Add(mark1);
 
                 MarkBox mark2 = new MarkBox();
                 mark2.Location = new Point(100, 100);
-                mark2.ContextMenu = _linecmenu;
+                mark2.ContextMenuStrip = _linecmenu;
                 ActiveForm.Controls.Add(mark2);
 
                 // Line Struct contains the information for a single line.

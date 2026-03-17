@@ -10,6 +10,7 @@ using Haden.NxtSharp.Sensors;
 using Haden.NxtSharp.Utilties;
 using NUnit.Framework;
 using SpeechLib;
+using Logging = Haden.NxtSharp.Utilties.Logging;
 
 namespace Haden.Tests
 {

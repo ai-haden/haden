@@ -14,6 +14,7 @@ using Haden.NxtSharp.Utilties;
 using Haden.Library;
 using SpeechLib;
 using Controller = Haden.NXTRemote.Data.Controller;
+using Logging = Haden.NxtSharp.Utilties.Logging;
 using System.IO;
 
 namespace Haden.NXTRemote.Forms
@@ -130,9 +131,16 @@ namespace Haden.NXTRemote.Forms
         /// </summary>
         public void LoadSettings()
         {
-            // Try a default setup using the Settings.xml file.
-            string path = Path.Combine(Environment.CurrentDirectory, Path.Combine("config", "Settings.xml"));
-            LoadSettings(path);
+            // Prefer app base directory for SDK-style output layout, then fallback to current directory.
+            string primaryPath = Path.Combine(AppContext.BaseDirectory, "config", "Settings.xml");
+            if (File.Exists(primaryPath))
+            {
+                LoadSettings(primaryPath);
+                return;
+            }
+
+            string fallbackPath = Path.Combine(Environment.CurrentDirectory, "config", "Settings.xml");
+            LoadSettings(fallbackPath);
         }
         /// <summary>
         /// Loads settings and configuration info from various xml files referenced in the settings file passed in the args. Also generates some default values if such values have not been set by the settings file.
@@ -969,7 +977,7 @@ namespace Haden.NXTRemote.Forms
             _voice.Speak("Opening mockup form.", SpeechVoiceSpeakFlags.SVSFDefault);
             if (SimulatorMockup.Instance == false)
             {
-                SimulatorMockup form = new SimulatorMockup(this, new ContextMenu());
+                SimulatorMockup form = new SimulatorMockup(this, new ContextMenuStrip());
                 form.Show(this);
                 SimulatorMockup.Instance = true;
             }

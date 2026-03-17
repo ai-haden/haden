@@ -478,4 +478,5 @@ Project notes and thoughts for Haden controller, an autonomous search program ex
 	1423: Done with this codebase except for hints. Might not come back anytime soon as all this kind of work is nostalgic.
 17.03.2026
 	1527: A serious attempt to bring this into the mainstream.
+	1758: Clunky but here in dotnet sdk9.0, away from framework.
 	

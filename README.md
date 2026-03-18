@@ -63,6 +63,13 @@ string html = tree.ToHtmlTree();
 - Project: `Haden.NxtSDK/Haden.NxtSDK.csproj`
 - Scope: headless NXT serial protocol client for connect, sensor input reads, motor output commands, and disconnect.
 
+## Linux Hardware Smoke
+
+- Project: `Haden.HardwareSmoke/Haden.HardwareSmoke.csproj`
+- Default command: `dotnet run --project Haden.HardwareSmoke/Haden.HardwareSmoke.csproj`
+- Auto-connect source order: command arg path -> `HADEN_NXT_PORT` -> `/dev/rfcomm0`
+- Detailed pairing/connectivity guide: `NXTRobot Setup.md`
+
 ## Linux Robot Behavior
 
 - Project: `Haden.RobotBehavior/Haden.RobotBehavior.csproj`

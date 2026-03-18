@@ -21,6 +21,8 @@ All notable fixes in this repository should be documented here.
 - `Haden.NxtSDK/NxtExceptions.cs`
 - `Haden.NxtSDK/NxtPacketCodec.cs`
 - `Haden.NxtSDK/NxtBrickClient.cs`
+- `Haden.HardwareSmoke/Haden.HardwareSmoke.csproj`
+- `Haden.HardwareSmoke/Program.cs`
 - `Haden.RobotBehavior/Haden.RobotBehavior.csproj`
 - `Haden.RobotBehavior/LightSeekBehavior.cs`
 - `Haden.ConsoleTests/RobotBehaviorTests.cs`
@@ -35,7 +37,7 @@ All notable fixes in this repository should be documented here.
 - `NEXT_SESSION_PROMPT.md`
 - `Haden.Tests/HardwareLightSeekingConsoleTests.cs`
   - Bug: recently added light-seeking logic was only present in a Windows-only hardware test path and not isolated for Linux review.
-  - Behavior change: extracted adaptive seek-cycle behavior into a new `net9.0` Linux review library, added Linux console tests for it, removed the Windows-only branch-added test file, removed Windows-only projects from the active solution, introduced a new headless `Haden.NxtSDK` Linux project for NXT serial protocol operations, migrated remaining legacy communicator methods (brick naming, mailbox messaging, low-speed/I2C), extracted non-UI light-seeking decision logic from historical manual/simulator forms into `Haden.RobotBehavior`, added a headless `Haden.Simulation` engine that reuses `Haden.Library.WhirlEngine` for whirl-state progression, added regression tests, removed old Windows-only project directories, and trimmed docs/prompts to Linux-only workflow guidance.
+  - Behavior change: extracted adaptive seek-cycle behavior into a new `net9.0` Linux review library, added Linux console tests for it, removed the Windows-only branch-added test file, removed Windows-only projects from the active solution, introduced a new headless `Haden.NxtSDK` Linux project for NXT serial protocol operations, migrated remaining legacy communicator methods (brick naming, mailbox messaging, low-speed/I2C), added `ConnectWithRetry` for project-level auto-connect, added a runnable `Haden.HardwareSmoke` console project that auto-connects to `/dev/rfcomm0` (or `HADEN_NXT_PORT`) and performs connect/keepalive/battery/disconnect, extracted non-UI light-seeking decision logic from historical manual/simulator forms into `Haden.RobotBehavior`, added a headless `Haden.Simulation` engine that reuses `Haden.Library.WhirlEngine` for whirl-state progression, added regression tests, removed old Windows-only project directories, and trimmed docs/prompts to Linux-only workflow guidance.
 - `global.json`
   - Bug: no SDK pin existed, so local `dotnet` selected `9.0.312`, which failed restore in this environment before tests could execute.
   - Behavior change: pinned SDK to `9.0.100` with roll-forward disabled to force a known-installed SDK for deterministic local build/test runs.

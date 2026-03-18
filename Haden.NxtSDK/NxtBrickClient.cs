@@ -1,5 +1,6 @@
 using System;
 using System.Text;
+using System.Threading;
 
 namespace Haden.NxtSDK
 {
@@ -29,6 +30,41 @@ namespace Haden.NxtSDK
             {
                 _transport.Open();
             }
+        }
+
+        public void ConnectWithRetry(int maxAttempts = 5, int delayMs = 1000)
+        {
+            if (maxAttempts < 1)
+            {
+                throw new ArgumentOutOfRangeException(nameof(maxAttempts), "maxAttempts must be at least 1.");
+            }
+
+            if (delayMs < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(delayMs), "delayMs must be zero or positive.");
+            }
+
+            Exception last = null;
+            for (int attempt = 1; attempt <= maxAttempts; attempt++)
+            {
+                try
+                {
+                    Connect();
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    last = ex;
+                    if (attempt < maxAttempts && delayMs > 0)
+                    {
+                        Thread.Sleep(delayMs);
+                    }
+                }
+            }
+
+            throw new InvalidOperationException(
+                "Failed to connect to NXT transport after retry attempts.",
+                last);
         }
 
         public void Disconnect()

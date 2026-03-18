@@ -483,3 +483,7 @@ Project notes and thoughts for Haden controller, an autonomous search program ex
 	1826: Can Ideal contribute here?
 	1833: Branches 1 and 2 have been modeled. Makes sense given constructivist epistemology is too advanced for a light-seeking robot.
 	1840: Next session can run live tests. I have a handoff to pickup where I am leaving off.
+18.03.2026
+	839: Getting today's load started.
+	959: Issues getting things working as I see Windows platform being made totally useless. Probably the intention.
+	

@@ -2,45 +2,49 @@ You are continuing development on the `haden` solution in this workspace:
 
 - Repo root: `C:\ame\aiventure\aiventure-github\ai-haden\haden`
 - Solution: `Haden.Autonomy.sln`
-- Main app run command: `dotnet run --project Haden.NxtRemote\Haden.NxtRemote.csproj`
+- Main app run command (Windows UI): `dotnet run --project Haden.NxtRemote\Haden.NxtRemote.csproj`
 
 Current priorities:
-1. Prepare for reliable live hardware testing with NXT over Bluetooth serial.
-2. Keep branch-01/branch-02 embodied + motivational logic testable in simulation.
-3. Preserve academic traceability for paper writing (LaTeX docs under `docs/paper`).
+1. Keep simulation and branch-01/branch-02 logic fully testable on Linux via console tests.
+2. Preserve/extend Windows hardware Bluetooth COM test coverage for NXT.
+3. Prepare for NXT brick replacement (current brick has screen issue; Linux Bluetooth pairing may require a new brick).
+4. Preserve academic traceability (`docs/paper/light_seeker_branch12.tex`).
 
 Important current context:
-- `Haden.NxtRemote` is WinForms (`net9.0-windows`) and runs on Windows.
+- `Haden.NxtRemote` is WinForms (`net9.0-windows`) and stays Windows-only.
 - Cross-platform logic is in `Haden.Library`.
-- Hardware tests should be Windows/COM-gated and must skip gracefully when no COM port exists.
-- Logging now auto-creates `logs`/`db` directories.
-- Existing embodied/motivational model:
-  - `Haden.Library/Algorithm/IdealEmbodiedLightSeeker.cs`
-  - `Haden.Tests/IdealBranch12LightSeekerTests.cs`
-- Existing RL model/tests:
-  - `Haden.Library/Algorithm/IdealReinforcementModel.cs`
-  - `Haden.Tests/RewardTests.cs`
-- Academic write-up:
-  - `docs/paper/light_seeker_branch12.tex`
+- New Linux-friendly simulation test project exists:
+  - `Haden.ConsoleTests/Haden.ConsoleTests.csproj`
+  - `Haden.ConsoleTests/Branch12ConsoleTests.cs`
+  - `Haden.ConsoleTests/RewardConsoleTests.cs`
+- New console hardware tests exist in `Haden.Tests`:
+  - `Haden.Tests/HardwareSmokeTests.cs`
+  - `Haden.Tests/HardwareLightSeekingConsoleTests.cs`
+- `SanityTests` is marked hardware/manual explicit.
+- Hardware tests are gated by Windows + COM and should skip gracefully.
+- COM port env var for hardware tests: `HADEN_NXT_COM_PORT` (example: `COM40`).
+- `global.json` pins SDK to `9.0.100`.
+- `Haden.ConsoleTests` currently runs successfully; `Haden.Tests` restore can still fail on some setups due to SDK resolver/workload issues.
 
 What to do first in the new session:
-1. Check current repo status and recent commits.
-2. Build test projects and report exact failures with file/line references.
-3. Create/validate a Windows-only hardware smoke test that does:
-   - Bluetooth COM connect
-   - light sensor read loop
-   - one motor movement command
-   - clean disconnect
-4. Keep simulation tests green while isolating hardware integration tests.
+1. Check repo status, active branch, and recent commits.
+2. Run Linux-friendly tests first:
+   - `dotnet test Haden.ConsoleTests\Haden.ConsoleTests.csproj --logger "console;verbosity=detailed"`
+3. Run Windows hardware console tests only when hardware is available:
+   - `$env:HADEN_NXT_COM_PORT="COM40"`
+   - `dotnet test Haden.Tests\Haden.Tests.csproj --filter "FullyQualifiedName~Haden.Tests.HardwareSmokeTests.NxtBluetoothSmoke_ConnectReadMoveDisconnect" --logger "console;verbosity=detailed"`
+   - `dotnet test Haden.Tests\Haden.Tests.csproj --filter "FullyQualifiedName~Haden.Tests.HardwareLightSeekingConsoleTests.ConsoleLightSeeking_PerformsBoundedSeekCycle" --logger "console;verbosity=detailed"`
+4. If `Haden.Tests` fails silently, rerun with diagnostic logging and capture exact `MSB` lines.
 5. Update `CHANGELOG.md` for every code fix.
 
 Guardrails:
 - Do not revert unrelated local changes.
 - Do not run destructive git commands.
 - Prefer minimal, testable changes.
-- If a command fails silently in this environment, rerun with alternate verbosity and capture useful diagnostics.
+- Keep Linux test work in `Haden.ConsoleTests` (`net9.0`, no WinForms/NXT UI dependencies).
+- Keep hardware tests isolated and explicitly environment-gated.
 
 Expected output style:
-- Findings first (if reviewing/fixing failures), then change summary.
+- Findings first, then change summary.
 - Include exact file paths and line references.
-- Include runnable commands for validation.
+- Include runnable validation commands.

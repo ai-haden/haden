@@ -45,3 +45,13 @@ string html = tree.ToHtmlTree();
 - `dotnet test Haden.Tests\Haden.Tests.csproj --filter "FullyQualifiedName~Haden.Tests.BaseLearnerTests" --logger "console;verbosity=detailed"`
 - `dotnet test Haden.Tests\Haden.Tests.csproj --filter "FullyQualifiedName~Haden.Tests.WhirlEngineTests" --logger "console;verbosity=detailed"`
 - `dotnet test Haden.Tests\Haden.Tests.csproj --logger "console;verbosity=detailed"`
+
+## Hardware Console Commands (No WinForms UI)
+
+- `$env:HADEN_NXT_COM_PORT="COM40"`
+- `dotnet test Haden.Tests\Haden.Tests.csproj --filter "FullyQualifiedName~Haden.Tests.HardwareSmokeTests.NxtBluetoothSmoke_ConnectReadMoveDisconnect" --logger "console;verbosity=detailed"`
+- `dotnet test Haden.Tests\Haden.Tests.csproj --filter "FullyQualifiedName~Haden.Tests.HardwareLightSeekingConsoleTests.ConsoleLightSeeking_PerformsBoundedSeekCycle" --logger "console;verbosity=detailed"`
+
+## Linux Console Tests
+
+- `dotnet test Haden.ConsoleTests\Haden.ConsoleTests.csproj --logger "console;verbosity=detailed"`

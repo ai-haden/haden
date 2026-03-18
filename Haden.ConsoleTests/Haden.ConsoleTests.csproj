@@ -20,5 +20,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Haden.Library\Haden.Library.csproj" />
+    <ProjectReference Include="..\Haden.LinuxMigrationReview\Haden.LinuxMigrationReview.csproj" />
   </ItemGroup>
 </Project>

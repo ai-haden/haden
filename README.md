@@ -4,7 +4,7 @@ The Framework mobile AI.
 
 ## Working here
 
-`dotnet run --project Haden.NxtRemote\Haden.NxtRemote.csproj`
+`dotnet test Haden.ConsoleTests/Haden.ConsoleTests.csproj --logger "console;verbosity=detailed"`
 
 ## Embodied Light-Seeker Decision Tree Export
 
@@ -39,19 +39,10 @@ string html = tree.ToHtmlTree();
 
 ## RL Test Commands
 
-- `dotnet test Haden.Tests\Haden.Tests.csproj --filter "FullyQualifiedName~Haden.Tests.RewardTests" --logger "console;verbosity=detailed"`
-- `dotnet test Haden.Tests\Haden.Tests.csproj --filter "FullyQualifiedName~Haden.Tests.IdealBranch12LightSeekerTests" --logger "console;verbosity=detailed"`
-- `dotnet test Haden.Tests\Haden.Tests.csproj --filter "FullyQualifiedName~Haden.Tests.IdealEmbodiedDecisionTreeAdapterTests" --logger "console;verbosity=detailed"`
-- `dotnet test Haden.Tests\Haden.Tests.csproj --filter "FullyQualifiedName~Haden.Tests.BaseLearnerTests" --logger "console;verbosity=detailed"`
-- `dotnet test Haden.Tests\Haden.Tests.csproj --filter "FullyQualifiedName~Haden.Tests.WhirlEngineTests" --logger "console;verbosity=detailed"`
-- `dotnet test Haden.Tests\Haden.Tests.csproj --logger "console;verbosity=detailed"`
+- `dotnet test Haden.ConsoleTests/Haden.ConsoleTests.csproj --logger "console;verbosity=detailed"`
 
-## Hardware Console Commands (No WinForms UI)
+## Linux Migration Review Library
 
-- `$env:HADEN_NXT_COM_PORT="COM40"`
-- `dotnet test Haden.Tests\Haden.Tests.csproj --filter "FullyQualifiedName~Haden.Tests.HardwareSmokeTests.NxtBluetoothSmoke_ConnectReadMoveDisconnect" --logger "console;verbosity=detailed"`
-- `dotnet test Haden.Tests\Haden.Tests.csproj --filter "FullyQualifiedName~Haden.Tests.HardwareLightSeekingConsoleTests.ConsoleLightSeeking_PerformsBoundedSeekCycle" --logger "console;verbosity=detailed"`
-
-## Linux Console Tests
-
-- `dotnet test Haden.ConsoleTests\Haden.ConsoleTests.csproj --logger "console;verbosity=detailed"`
+- Project: `Haden.LinuxMigrationReview/Haden.LinuxMigrationReview.csproj`
+- Purpose: keep extracted platform-neutral logic from recently added Windows-only paths in a Linux-reviewable library.
+- Current extracted logic: adaptive seek-cycle state update (`AdaptiveSeekCycle`).

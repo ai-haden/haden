@@ -486,4 +486,4 @@ Project notes and thoughts for Haden controller, an autonomous search program ex
 18.03.2026
 	839: Getting today's load started.
 	959: Issues getting things working as I see Windows platform being made totally useless. Probably the intention.
-	
+	1011: So SAD the state of the Windows platform. Reality is what it is, right?

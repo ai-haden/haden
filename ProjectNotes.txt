@@ -491,4 +491,5 @@ Project notes and thoughts for Haden controller, an autonomous search program ex
 	1312: New brick-enabled robot is ready for linux testing.
 	1317: Seek maximum light value test coming soon.
 	1405: Sanity test check is successful.
+	1407: Start testing day with both Bluetooth enabled and run: sudo rfcomm connect /dev/rfcomm0 00:16:53:17:9B:47 1
 	

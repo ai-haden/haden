@@ -14,6 +14,9 @@ The Framework mobile AI.
 * `dotnet run --project Haden.HardwareSmoke/Haden.HardwareSmoke.csproj -- /dev/rfcomm0`
 * `sudo rfcomm connect /dev/rfcomm0 00:16:53:17:9B:47 1`
 
+## Each testing day
+
+`sudo rfcomm connect /dev/rfcomm0 00:16:53:17:9B:47 1`
 
 ## Quality Gate
 

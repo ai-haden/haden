@@ -8,6 +8,15 @@ All notable fixes in this repository should be documented here.
 - Established changelog workflow for tracking code fixes over time.
 
 ### Fixed
+- `global.json`
+  - Bug: no SDK pin existed, so local `dotnet` selected `9.0.312`, which failed restore in this environment before tests could execute.
+  - Behavior change: pinned SDK to `9.0.100` with roll-forward disabled to force a known-installed SDK for deterministic local build/test runs.
+- `Haden.Tests/HardwareSmokeTests.cs`
+  - Bug: no single deterministic hardware smoke test existed for the required NXT Bluetooth validation path (connect, sensor read loop, motor command, clean disconnect).
+  - Behavior change: added a dedicated Windows-only, COM-gated smoke test that requires explicit `HADEN_NXT_COM_PORT` and performs connect/read/move/disconnect in one flow.
+- `Haden.Tests/SanityTests.cs`
+  - Bug: legacy manual/hardware tests were part of standard discovery and could interfere with default simulation-focused test runs.
+  - Behavior change: marked `SanityTests` as explicit hardware/manual integration tests with a hardware category so they are isolated from normal test execution.
 - `Haden.NxtSharp/Sensors/NxtSensor.cs`
   - Prevented first-poll null reference by treating `LastResult == null` as a value-change boundary.
 - `Haden.NxtSharp/Brick/NxtBrick.cs`

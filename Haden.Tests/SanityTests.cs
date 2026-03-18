@@ -16,6 +16,8 @@ using Logging = Haden.NxtSharp.Utilties.Logging;
 namespace Haden.Tests
 {
     [TestFixture]
+    [Category("Hardware")]
+    [Explicit("Manual/hardware integration tests. Use targeted runs when NXT hardware and speech setup are available.")]
     public class SanityTests
     {
         // Aesthetics

@@ -46,3 +46,8 @@ string html = tree.ToHtmlTree();
 - Project: `Haden.LinuxMigrationReview/Haden.LinuxMigrationReview.csproj`
 - Purpose: keep extracted platform-neutral logic from recently added Windows-only paths in a Linux-reviewable library.
 - Current extracted logic: adaptive seek-cycle state update (`AdaptiveSeekCycle`).
+
+## Linux NXT SDK
+
+- Project: `Haden.NxtSDK/Haden.NxtSDK.csproj`
+- Scope: headless NXT serial protocol client for connect, sensor input reads, motor output commands, and disconnect.

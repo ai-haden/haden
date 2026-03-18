@@ -12,14 +12,21 @@ All notable fixes in this repository should be documented here.
 - `Haden.ConsoleTests/Branch12ConsoleTests.cs`
 - `Haden.ConsoleTests/RewardConsoleTests.cs`
 - `Haden.ConsoleTests/AdaptiveSeekCycleTests.cs`
+- `Haden.ConsoleTests/NxtSdkProtocolTests.cs`
 - `Haden.LinuxMigrationReview/Haden.LinuxMigrationReview.csproj`
 - `Haden.LinuxMigrationReview/AdaptiveSeekCycle.cs`
+- `Haden.NxtSDK/Haden.NxtSDK.csproj`
+- `Haden.NxtSDK/Transport.cs`
+- `Haden.NxtSDK/NxtProtocolTypes.cs`
+- `Haden.NxtSDK/NxtExceptions.cs`
+- `Haden.NxtSDK/NxtPacketCodec.cs`
+- `Haden.NxtSDK/NxtBrickClient.cs`
 - `Haden.Autonomy.sln`
 - `README.md`
 - `NEXT_SESSION_PROMPT.md`
 - `Haden.Tests/HardwareLightSeekingConsoleTests.cs`
   - Bug: recently added light-seeking logic was only present in a Windows-only hardware test path and not isolated for Linux review.
-  - Behavior change: extracted adaptive seek-cycle behavior into a new `net9.0` Linux review library, added Linux console tests for it, removed the Windows-only branch-added test file, removed Windows-only projects from the active solution, and trimmed docs/prompts to Linux-only workflow guidance.
+  - Behavior change: extracted adaptive seek-cycle behavior into a new `net9.0` Linux review library, added Linux console tests for it, removed the Windows-only branch-added test file, removed Windows-only projects from the active solution, introduced a new headless `Haden.NxtSDK` Linux project for NXT serial protocol operations, and trimmed docs/prompts to Linux-only workflow guidance.
 - `global.json`
   - Bug: no SDK pin existed, so local `dotnet` selected `9.0.312`, which failed restore in this environment before tests could execute.
   - Behavior change: pinned SDK to `9.0.100` with roll-forward disabled to force a known-installed SDK for deterministic local build/test runs.

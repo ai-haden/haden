@@ -7,6 +7,7 @@ Current priorities:
 1. Keep branch-01/branch-02 embodied and RL logic testable on Linux.
 2. Keep cross-platform logic in `Haden.Library`.
 3. Keep extracted migration candidates in `Haden.LinuxMigrationReview`.
+4. Keep NXT serial protocol work in headless `Haden.NxtSDK`.
 
 Important current context:
 - Linux console tests:
@@ -17,6 +18,10 @@ Important current context:
 - Linux migration review library:
   - `Haden.LinuxMigrationReview/Haden.LinuxMigrationReview.csproj`
   - `Haden.LinuxMigrationReview/AdaptiveSeekCycle.cs`
+- Linux NXT SDK:
+  - `Haden.NxtSDK/Haden.NxtSDK.csproj`
+  - `Haden.NxtSDK/NxtBrickClient.cs`
+  - `Haden.NxtSDK/Transport.cs`
 - SDK pin:
   - `global.json` pins `9.0.100`
 

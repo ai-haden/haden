@@ -2,9 +2,20 @@
 
 The Framework mobile AI.
 
+## Branch Policy
+
+- `main` is Linux-first and contains the active codebase.
+- `windows-legacy` is a frozen branch kept only for historical WinForms validation/comparison.
+- Do not add new feature work to `windows-legacy`.
+
 ## Working here
 
 `dotnet test Haden.ConsoleTests/Haden.ConsoleTests.csproj --logger "console;verbosity=detailed"`
+
+## Quality Gate
+
+- `dotnet build Haden.Autonomy.sln -warnaserror -v minimal`
+- `dotnet test Haden.Autonomy.sln --logger "console;verbosity=detailed"`
 
 ## Embodied Light-Seeker Decision Tree Export
 

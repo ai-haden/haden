@@ -490,4 +490,5 @@ Project notes and thoughts for Haden controller, an autonomous search program ex
 	1200: Linux baseline is ready to return when I replace the brick.
 	1312: New brick-enabled robot is ready for linux testing.
 	1317: Seek maximum light value test coming soon.
+	1405: Sanity test check is successful.
 	

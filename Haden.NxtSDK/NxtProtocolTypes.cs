@@ -4,13 +4,19 @@ namespace Haden.NxtSDK
 {
     public enum NxtCommand : byte
     {
+        MessageWrite = 0x09,
+        MessageRead = 0x13,
         SetOutputState = 0x04,
         SetInputMode = 0x05,
         GetOutputState = 0x06,
         GetInputValues = 0x07,
         ResetMotorPosition = 0x0A,
         GetBatteryLevel = 0x0B,
-        KeepAlive = 0x0D
+        KeepAlive = 0x0D,
+        LsGetStatus = 0x0E,
+        LsWrite = 0x0F,
+        LsRead = 0x10,
+        SetBrickName = 0x98
     }
 
     [Flags]

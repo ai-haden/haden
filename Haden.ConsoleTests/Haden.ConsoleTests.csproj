@@ -20,6 +20,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Haden.Library\Haden.Library.csproj" />
+    <ProjectReference Include="..\Haden.RobotBehavior\Haden.RobotBehavior.csproj" />
+    <ProjectReference Include="..\Haden.Simulation\Haden.Simulation.csproj" />
     <ProjectReference Include="..\Haden.NxtSDK\Haden.NxtSDK.csproj" />
     <ProjectReference Include="..\Haden.LinuxMigrationReview\Haden.LinuxMigrationReview.csproj" />
   </ItemGroup>

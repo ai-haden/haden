@@ -8,6 +8,8 @@ Current priorities:
 2. Keep cross-platform logic in `Haden.Library`.
 3. Keep extracted migration candidates in `Haden.LinuxMigrationReview`.
 4. Keep NXT serial protocol work in headless `Haden.NxtSDK`.
+5. Keep extracted non-UI behavior logic in `Haden.RobotBehavior`.
+6. Keep headless simulation whirl flow in `Haden.Simulation`.
 
 Important current context:
 - Linux console tests:
@@ -22,6 +24,12 @@ Important current context:
   - `Haden.NxtSDK/Haden.NxtSDK.csproj`
   - `Haden.NxtSDK/NxtBrickClient.cs`
   - `Haden.NxtSDK/Transport.cs`
+- Linux robot behavior:
+  - `Haden.RobotBehavior/Haden.RobotBehavior.csproj`
+  - `Haden.RobotBehavior/LightSeekBehavior.cs`
+- Linux simulation:
+  - `Haden.Simulation/Haden.Simulation.csproj`
+  - `Haden.Simulation/LightSeekSimulationEngine.cs`
 - SDK pin:
   - `global.json` pins `9.0.100`
 

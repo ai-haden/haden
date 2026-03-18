@@ -70,6 +70,97 @@ namespace Haden.ConsoleTests
             Assert.That(message[13], Is.EqualTo(0x00));
         }
 
+        [Test]
+        public void SetBrickName_TruncatesTo14BytesAndSendsNoResponseCommand()
+        {
+            var transport = new FakeTransport();
+            var client = new NxtBrickClient(transport);
+            client.Connect();
+
+            client.SetBrickName("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+
+            Assert.That(transport.Writes.Count, Is.EqualTo(1));
+            byte[] msg = transport.Writes[0];
+            Assert.That(msg[2], Is.EqualTo(0x81));
+            Assert.That(msg[3], Is.EqualTo((byte)NxtCommand.SetBrickName));
+            string sent = System.Text.Encoding.ASCII.GetString(msg, 4, 14);
+            Assert.That(sent, Is.EqualTo("ABCDEFGHIJKLMN"));
+        }
+
+        [Test]
+        public void MessageWrite_Int_UsesLittleEndianPayload()
+        {
+            var transport = new FakeTransport();
+            var client = new NxtBrickClient(transport);
+            client.Connect();
+
+            client.MessageWrite(mailbox: 1, value: 0x01020304);
+
+            byte[] msg = transport.Writes[0];
+            Assert.That(msg[2], Is.EqualTo(0x80));
+            Assert.That(msg[3], Is.EqualTo((byte)NxtCommand.MessageWrite));
+            Assert.That(msg[4], Is.EqualTo(0x01));
+            Assert.That(msg[5], Is.EqualTo(0x05));
+            Assert.That(msg[6], Is.EqualTo(0x04));
+            Assert.That(msg[7], Is.EqualTo(0x03));
+            Assert.That(msg[8], Is.EqualTo(0x02));
+            Assert.That(msg[9], Is.EqualTo(0x01));
+        }
+
+        [Test]
+        public void MessageReadString_ReturnsAsciiWithoutTrailingNull()
+        {
+            var transport = new FakeTransport();
+            transport.EnqueueReply(Packet(
+                0x02,
+                (byte)NxtCommand.MessageRead,
+                0x00,
+                0x00,
+                0x03,
+                (byte)'O',
+                (byte)'K',
+                0x00));
+
+            var client = new NxtBrickClient(transport);
+            client.Connect();
+
+            string value = client.MessageReadString(mailbox: 0);
+            Assert.That(value, Is.EqualTo("OK"));
+        }
+
+        [Test]
+        public void LsWrite_RejectsOutOfRangePayloadLength()
+        {
+            var transport = new FakeTransport();
+            var client = new NxtBrickClient(transport);
+            client.Connect();
+
+            Assert.Throws<InvalidOperationException>(
+                () => client.LsWrite(NxtSensorPort.Port1, new byte[0], 1));
+            Assert.Throws<InvalidOperationException>(
+                () => client.LsWrite(NxtSensorPort.Port1, new byte[17], 1));
+        }
+
+        [Test]
+        public void I2CGetByte_WritesStatusPollAndReadsResult()
+        {
+            var transport = new FakeTransport();
+            transport.EnqueueReply(Packet(0x02, (byte)NxtCommand.LsWrite, 0x00));
+            transport.EnqueueReply(Packet(0x02, (byte)NxtCommand.LsGetStatus, 0x00, 0x01));
+            transport.EnqueueReply(Packet(0x02, (byte)NxtCommand.LsRead, 0x00, 0x01, 0x2A));
+
+            var client = new NxtBrickClient(transport);
+            client.Connect();
+
+            byte result = client.I2CGetByte(NxtSensorPort.Port4, 0x42);
+
+            Assert.That(result, Is.EqualTo(0x2A));
+            Assert.That(transport.Writes.Count, Is.EqualTo(3));
+            Assert.That(transport.Writes[0][3], Is.EqualTo((byte)NxtCommand.LsWrite));
+            Assert.That(transport.Writes[1][3], Is.EqualTo((byte)NxtCommand.LsGetStatus));
+            Assert.That(transport.Writes[2][3], Is.EqualTo((byte)NxtCommand.LsRead));
+        }
+
         private static byte[] Packet(params byte[] payload)
         {
             var packet = new byte[payload.Length + 2];

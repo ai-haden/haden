@@ -1,9 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-<root>
-  <!-- General settings -->
-  <item name="authorization" value="false"/>
-  <item name="differencemagnitude" value="1E-5"/>
-  <item name="logfile" value="logs"/>
-  <item name="whirlduration" value="20000"/>
-  <item name="desiredattribute" value="None"/>
-</root>

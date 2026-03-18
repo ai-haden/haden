@@ -51,3 +51,13 @@ string html = tree.ToHtmlTree();
 
 - Project: `Haden.NxtSDK/Haden.NxtSDK.csproj`
 - Scope: headless NXT serial protocol client for connect, sensor input reads, motor output commands, and disconnect.
+
+## Linux Robot Behavior
+
+- Project: `Haden.RobotBehavior/Haden.RobotBehavior.csproj`
+- Scope: extracted non-UI light-seeking behavior logic from legacy manual/simulator flows (turn-choice and sensor-difference decision routines).
+
+## Linux Simulation
+
+- Project: `Haden.Simulation/Haden.Simulation.csproj`
+- Scope: headless simulation whirl engine for light-seeking state updates using `Haden.Library.WhirlEngine`.

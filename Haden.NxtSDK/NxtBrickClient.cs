@@ -1,9 +1,11 @@
 using System;
+using System.Text;
 
 namespace Haden.NxtSDK
 {
     public sealed class NxtBrickClient : IDisposable
     {
+        private const int DefaultI2CStatusPollLimit = 20;
         private readonly INxtTransport _transport;
         private readonly bool _ownsTransport;
 
@@ -49,6 +51,26 @@ namespace Haden.NxtSDK
         public void KeepAlive()
         {
             SendMessage(new byte[] { 0x80, (byte)NxtCommand.KeepAlive });
+        }
+
+        public void SetBrickName(string name)
+        {
+            if (name == null)
+            {
+                throw new ArgumentNullException(nameof(name));
+            }
+
+            if (name.Length > 14)
+            {
+                name = name.Substring(0, 14);
+            }
+
+            byte[] nameBytes = Encoding.ASCII.GetBytes(name);
+            byte[] message = new byte[18];
+            message[0] = 0x81;
+            message[1] = (byte)NxtCommand.SetBrickName;
+            Array.Copy(nameBytes, 0, message, 2, nameBytes.Length);
+            SendMessage(message);
         }
 
         public int GetBatteryLevel()
@@ -187,6 +209,164 @@ namespace Haden.NxtSDK
             message[2] = (byte)port;
             message[3] = relative ? (byte)1 : (byte)0;
             SendMessage(message);
+        }
+
+        public int LsGetStatus(NxtSensorPort port)
+        {
+            byte[] message = new byte[3];
+            message[0] = 0x00;
+            message[1] = (byte)NxtCommand.LsGetStatus;
+            message[2] = (byte)port;
+            byte[] reply = SendMessage(message);
+            return reply[3];
+        }
+
+        public void LsWrite(NxtSensorPort port, byte[] data, int returnMessageLength)
+        {
+            if (data == null)
+            {
+                throw new ArgumentNullException(nameof(data));
+            }
+
+            if (data.Length < 1 || data.Length > 16)
+            {
+                throw new InvalidOperationException("The data length must be between 1 and 16 bytes.");
+            }
+
+            byte[] message = new byte[5 + data.Length];
+            message[0] = 0x00;
+            message[1] = (byte)NxtCommand.LsWrite;
+            message[2] = (byte)port;
+            message[3] = (byte)data.Length;
+            message[4] = (byte)returnMessageLength;
+            Array.Copy(data, 0, message, 5, data.Length);
+            SendMessage(message);
+        }
+
+        public byte[] LsRead(NxtSensorPort port)
+        {
+            byte[] message = new byte[3];
+            message[0] = 0x00;
+            message[1] = (byte)NxtCommand.LsRead;
+            message[2] = (byte)port;
+            byte[] reply = SendMessage(message);
+            int length = reply[3];
+            byte[] result = new byte[length];
+            Array.Copy(reply, 4, result, 0, length);
+            return result;
+        }
+
+        public void MessageWrite(byte mailbox, byte[] data)
+        {
+            if (data == null)
+            {
+                throw new ArgumentNullException(nameof(data));
+            }
+
+            if (data.Length > 57)
+            {
+                throw new ArgumentException("Data size must be less than 58 bytes.", nameof(data));
+            }
+
+            byte[] message = new byte[5 + data.Length];
+            message[0] = 0x80;
+            message[1] = (byte)NxtCommand.MessageWrite;
+            message[2] = mailbox;
+            message[3] = (byte)(data.Length + 1);
+            Array.Copy(data, 0, message, 4, data.Length);
+            SendMessage(message);
+        }
+
+        public void MessageWrite(byte mailbox, string value)
+        {
+            if (value == null)
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
+
+            MessageWrite(mailbox, Encoding.ASCII.GetBytes(value));
+        }
+
+        public void MessageWrite(byte mailbox, int value)
+        {
+            byte[] data = new byte[4];
+            NxtPacketCodec.SetInt32(data, 0, value);
+            MessageWrite(mailbox, data);
+        }
+
+        public void MessageWrite(byte mailbox, bool value)
+        {
+            MessageWrite(mailbox, new[] { value ? (byte)0x01 : (byte)0x00 });
+        }
+
+        public byte[] MessageRead(byte mailbox)
+        {
+            byte[] message = new byte[5];
+            message[0] = 0x00;
+            message[1] = (byte)NxtCommand.MessageRead;
+            message[2] = (byte)(mailbox + 10);
+            message[3] = (byte)(mailbox + 10);
+            message[4] = 0x01;
+            byte[] reply = SendMessage(message);
+            int size = reply[4];
+            byte[] result = new byte[size];
+            Array.Copy(reply, 5, result, 0, size);
+            return result;
+        }
+
+        public string MessageReadString(byte mailbox)
+        {
+            byte[] data = MessageRead(mailbox);
+            return Encoding.ASCII.GetString(data, 0, data.Length - 1);
+        }
+
+        public int MessageReadInt(byte mailbox)
+        {
+            byte[] data = MessageRead(mailbox);
+            return NxtPacketCodec.GetInt32(data, 0);
+        }
+
+        public bool MessageReadBool(byte mailbox)
+        {
+            byte[] data = MessageRead(mailbox);
+            return data[0] != 0;
+        }
+
+        public void I2CSetByte(NxtSensorPort port, byte address, byte value)
+        {
+            byte[] command = new byte[3];
+            command[0] = 0x02;
+            command[1] = address;
+            command[2] = value;
+            LsWrite(port, command, 0);
+        }
+
+        public byte I2CGetByte(NxtSensorPort port, byte address)
+        {
+            byte[] command = new byte[2];
+            command[0] = 0x02;
+            command[1] = address;
+
+            int bytesRead = 0;
+            for (int i = 0; i < DefaultI2CStatusPollLimit && bytesRead < 1; i++)
+            {
+                LsWrite(port, command, 1);
+                try
+                {
+                    bytesRead = LsGetStatus(port);
+                }
+                catch (NxtCommunicationBusErrorException)
+                {
+                    bytesRead = 0;
+                }
+            }
+
+            if (bytesRead < 1)
+            {
+                throw new NxtProtocolException("I2C read status did not report available bytes.");
+            }
+
+            return LsRead(port)[0];
         }
 
         private byte[] SendMessage(byte[] message)

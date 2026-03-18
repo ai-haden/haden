@@ -40,5 +40,14 @@ namespace Haden.NxtSDK
                 value /= 256;
             }
         }
+
+        public static void SetInt32(byte[] buffer, int start, int value)
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                buffer[start + i] = (byte)(value & 0xff);
+                value /= 256;
+            }
+        }
     }
 }

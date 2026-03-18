@@ -82,3 +82,11 @@ string html = tree.ToHtmlTree();
 
 - Project: `Haden.Simulation/Haden.Simulation.csproj`
 - Scope: headless simulation whirl engine for light-seeking state updates using `Haden.Library.WhirlEngine`.
+
+## Errata
+
+```
+Robot17 - 00:16:53:17:9B:47
+
+sdptool browse 00:16:53:17:9B:47 | grep -E "Service Name|Channel|Serial Port" -A2
+```

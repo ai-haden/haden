@@ -487,4 +487,5 @@ Project notes and thoughts for Haden controller, an autonomous search program ex
 	839: Getting today's load started.
 	959: Issues getting things working as I see Windows platform being made totally useless. Probably the intention.
 	1009: Need to migrate to linux but this will take some work.
+	1200: Linux baseline is ready to return when I replace the brick.
 	

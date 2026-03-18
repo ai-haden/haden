@@ -10,7 +10,10 @@ The Framework mobile AI.
 
 ## Working here
 
-`dotnet test Haden.ConsoleTests/Haden.ConsoleTests.csproj --logger "console;verbosity=detailed"`
+* `dotnet test Haden.ConsoleTests/Haden.ConsoleTests.csproj --logger "console;verbosity=detailed"`
+* `dotnet run --project Haden.HardwareSmoke/Haden.HardwareSmoke.csproj -- /dev/rfcomm0`
+* `sudo rfcomm connect /dev/rfcomm0 00:16:53:17:9B:47 1`
+
 
 ## Quality Gate
 

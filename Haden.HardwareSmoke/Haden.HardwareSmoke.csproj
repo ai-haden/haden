@@ -10,5 +10,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Haden.NxtSDK\Haden.NxtSDK.csproj" />
+    <ProjectReference Include="..\Haden.RobotBehavior\Haden.RobotBehavior.csproj" />
   </ItemGroup>
 </Project>

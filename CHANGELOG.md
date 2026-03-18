@@ -8,6 +8,12 @@ All notable fixes in this repository should be documented here.
 - Established changelog workflow for tracking code fixes over time.
 
 ### Fixed
+- `Haden.RobotBehavior/LegacyAutonomousLightSeekEngine.cs`
+- `Haden.ConsoleTests/LegacyAutonomousLightSeekEngineTests.cs`
+- `Haden.HardwareSmoke/Haden.HardwareSmoke.csproj`
+- `Haden.HardwareSmoke/Program.cs`
+  - Bug: Linux runtime only covered simplified seek/difference logic and did not preserve the richer, latest `HadenManualControl` autonomous light-seek state machine from Windows forms.
+  - Behavior change: added a stateful legacy-autonomy engine (`Peek/Compare` style flow with iteration, peak, reward, and turn memory), regression tests for that flow, and a live Bluetooth `--seek-max-light` mode in `Haden.HardwareSmoke` to execute the migrated logic on real NXT hardware.
 - `Haden.ConsoleTests/Haden.ConsoleTests.csproj`
 - `Haden.ConsoleTests/Branch12ConsoleTests.cs`
 - `Haden.ConsoleTests/RewardConsoleTests.cs`

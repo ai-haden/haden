@@ -150,8 +150,9 @@ namespace Haden.HardwareSmoke
             bool steerInvert = ReadBoolEnv("HADEN_STEER_INVERT", false);
             bool scanInvert = ReadBoolEnv("HADEN_SCAN_INVERT", false);
             bool centerScanOnStart = ReadBoolEnv("HADEN_CENTER_SCAN_ON_START", true);
-            int centerSweepDegrees = ReadIntEnv("HADEN_CENTER_SWEEP_DEGREES", 160);
+            int centerHomeDegrees = ReadIntEnv("HADEN_CENTER_HOME_DEGREES", 180);
             int centerPower = ReadIntEnv("HADEN_CENTER_POWER", 22);
+            int centerSettleMs = ReadIntEnv("HADEN_CENTER_SETTLE_MS", 250);
             int smoothWindow = Math.Clamp(ReadIntEnv("HADEN_LIGHT_SMOOTH_WINDOW", 3), 1, 10);
             string databasePath = ReadStringEnv("HADEN_RL_DB_PATH", "output/haden-rl.db");
             var smoother = new LightSignalSmoother(smoothWindow);
@@ -191,7 +192,7 @@ namespace Haden.HardwareSmoke
 
             if (centerScanOnStart)
             {
-                CenterScanMotorAtStart(client, scanMotorPort, centerSweepDegrees, centerPower, settleDelayMs);
+                CenterScanMotorAtStart(client, scanMotorPort, centerHomeDegrees, centerPower, centerSettleMs);
             }
 
             int completedIterations = 0;
@@ -344,30 +345,30 @@ namespace Haden.HardwareSmoke
         private static void CenterScanMotorAtStart(
             NxtBrickClient client,
             NxtMotorPort scanMotorPort,
-            int sweepDegrees,
+            int homeDegrees,
             int power,
-            int settleDelayMs)
+            int settleMs)
         {
-            int safeSweep = Math.Clamp(sweepDegrees, 20, 360);
+            int safeHome = Math.Clamp(homeDegrees, 30, 360);
             int safePower = Math.Clamp(power, 5, 70);
-            int halfSweep = Math.Max(10, safeSweep / 2);
+            int settle = Math.Clamp(settleMs, 50, 5000);
 
             Console.WriteLine(
-                "Centering scan motor: sweep=" + safeSweep +
+                "Centering scan motor: homeDegrees=" + safeHome +
                 ", power=" + safePower +
-                ", halfSweep=" + halfSweep);
+                ", settleMs=" + settle);
 
-            client.TurnMotor(scanMotorPort, -safePower, safeSweep);
-            if (settleDelayMs > 0)
-            {
-                System.Threading.Thread.Sleep(Math.Max(150, settleDelayMs / 2));
-            }
+            // Home to one end-stop.
+            client.TurnMotor(scanMotorPort, -safePower, safeHome);
+            System.Threading.Thread.Sleep(settle);
 
-            client.TurnMotor(scanMotorPort, safePower, halfSweep);
-            if (settleDelayMs > 0)
-            {
-                System.Threading.Thread.Sleep(Math.Max(150, settleDelayMs / 2));
-            }
+            // Sweep to the opposite end-stop.
+            client.TurnMotor(scanMotorPort, safePower, safeHome * 2);
+            System.Threading.Thread.Sleep(settle);
+
+            // Return half-range to approximate midpoint.
+            client.TurnMotor(scanMotorPort, -safePower, safeHome);
+            System.Threading.Thread.Sleep(settle);
 
             client.BrakeMotor(scanMotorPort);
         }

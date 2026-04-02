@@ -26,6 +26,10 @@ All notable fixes in this repository should be documented here.
 - `README.md`
   - Bug: live seek episodes used arbitrary iteration cutoffs and had no persistent RL scorecard/session storage, so confidence and reward history could not be carried forward between experiments.
   - Behavior change: added NXT touch-sensor reads and bump-driven episode termination, introduced explicit step reward shaping and trajectory logging (`sensorRaw/sensorSmooth/delta/reward/bump`), added SQLite-backed persistence for sessions/steps/RL points/scorecard confidence, added `--scorecard` reporting mode, centered the sensor scan motor at experiment start to avoid end-stop bias, kept `HADEN_SEEK_MAX_ITERATIONS` as safety fallback, and documented bump-sensor plus database runtime controls.
+- `Haden.HardwareSmoke/Program.cs`
+- `README.md`
+  - Bug: scan centering could start from an arbitrary cocked end and stop off-midpoint, biasing initial light readings and steering.
+  - Behavior change: replaced centering with a 3-phase end-stop homing sequence (home -> opposite end -> midpoint) and added explicit centering controls (`HADEN_CENTER_HOME_DEGREES`, `HADEN_CENTER_SETTLE_MS`).
 - `Haden.RobotBehavior/LegacyAutonomousLightSeekEngine.cs`
 - `Haden.ConsoleTests/LegacyAutonomousLightSeekEngineTests.cs`
 - `Haden.HardwareSmoke/Haden.HardwareSmoke.csproj`

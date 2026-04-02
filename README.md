@@ -83,7 +83,7 @@ string html = tree.ToHtmlTree();
   - Control tuning: `HADEN_SCAN_POWER`, `HADEN_SCAN_DEGREES_MIN`, `HADEN_SCAN_DEGREES_MAX`, `HADEN_SCAN_DEGREES_STEP`, `HADEN_WHEEL_BASE_POWER`, `HADEN_WHEEL_MAX_POWER`, `HADEN_WHEEL_TURN_GAIN`, `HADEN_WHEEL_TURN_FLOOR`, `HADEN_SEEK_DELTA_DEADBAND`, `HADEN_PEAK_TOLERANCE`, `HADEN_WHEEL_STEP_DEGREES`
   - Steering polarity and signal conditioning: `HADEN_STEER_INVERT` (`0`/`1`), `HADEN_SCAN_INVERT` (`0`/`1`), `HADEN_LIGHT_SMOOTH_WINDOW` (`1-10`, default `3`)
   - Bump-sensor control: `HADEN_BUMP_SENSOR_PORT` (default `1`), `HADEN_BUMP_ACTIVE_LOW` (`0`/`1`)
-  - Start-of-run centering: `HADEN_CENTER_SCAN_ON_START` (`0`/`1`, default `1`), `HADEN_CENTER_SWEEP_DEGREES` (default `160`), `HADEN_CENTER_POWER` (default `22`)
+  - Start-of-run centering: `HADEN_CENTER_SCAN_ON_START` (`0`/`1`, default `1`), `HADEN_CENTER_HOME_DEGREES` (default `180`), `HADEN_CENTER_POWER` (default `22`), `HADEN_CENTER_SETTLE_MS` (default `250`)
   - SQLite persistence: `HADEN_RL_DB_PATH` (default `output/haden-rl.db`)
   - Stored tables: `experiment_session`, `experiment_step`, `rl_point`, `rl_scorecard`
 

@@ -1,48 +1,62 @@
 You are continuing development on `haden` in this workspace:
 
 - Repo root: `/home/cartheur/ame/aiventure/aiventure-github/ai-haden/haden`
-- Active branch target: `main` (Linux-first)
-- Legacy reference branch: `windows-legacy` (frozen; read-only reference only)
+- Active branch: `main` (Linux-first)
+- Legacy branch: `windows-legacy` (reference only)
 
-Primary mission for this session:
-1. Prepare live NXT hardware validation on this Linux test machine by re-pairing/replacing the brick Bluetooth mapping.
-2. Develop and validate light-seeking behavior on real hardware and simulation.
-3. Produce publication-grade experimental artifacts and writing inputs aimed at a world-class paper.
+Primary mission for this next session:
+1. Validate that real robot behavior no longer gets pathologically stuck in one direction when light evidence is uncertain.
+2. Run full genuine RL episodes (terminate on bump sensor), not arbitrary early stops.
+3. Capture paper-ready evidence showing `sense -> decide -> move` behavior with boredom-triggered directional reversal.
 
-Critical context:
-- Headless Linux projects:
-  - `Haden.NxtSDK` (NXT protocol/transport)
-  - `Haden.RobotBehavior` (behavior logic)
-  - `Haden.Simulation` (whirl-driven simulation engine)
-  - `Haden.ConsoleTests` (all tests)
-- `windows-legacy` exists only for fallback comparison of old behavior.
+Current behavior state (already implemented):
+- Triplet probe sensing (`L/C/R`) on sensor motor A before movement.
+- Evidence-gated wheel movement (B/C) with confidence threshold.
+- Adaptive probe escalation when contrast is flat.
+- Boredom/anti-pathology policy:
+  - direction bias alternation under sustained uncertainty,
+  - boredom-triggered flip,
+  - same-direction stuck forced flip,
+  - near-peak now requires confirmed peak stability.
+- Post-decision scan-head nudge disabled by default to avoid end-stop banging (`HADEN_SEEK_SCAN_NUDGE_ENABLE=0` default).
+- Motor safety:
+  - global best-effort de-power in `finally` for A/B/C,
+  - manual `--all-stop` mode.
+
+Important observed facts from this session:
+- Robot previously showed pathological CCW-end behavior.
+- New logs now include `actionMode`, `boredomBiasDir`, `boredomTriggered`, `forcedFlip`, `sameDirStuckCount`, `nearPeakConfirmed`.
+- `--all-stop` successfully quieted motors.
+- Bluetooth/RFCOMM can become stale (`Device or resource busy`); rebinding may be needed.
 
 Session workflow:
-1. Verify build quality gate:
+1. Preflight + quality gate:
    - `dotnet build Haden.Autonomy.sln -warnaserror -v minimal`
-   - `dotnet test Haden.Autonomy.sln --logger "console;verbosity=detailed"`
-2. Hardware readiness:
-   - Confirm Bluetooth pairing path for the new/reconfigured NXT brick.
-   - Confirm serial transport visibility for NXT communication on Linux.
-   - Add/adjust hardware-gated console validation for connect/read/turn/disconnect using `Haden.NxtSDK`.
-3. Behavior development:
-   - Improve light-seeking policy in `Haden.RobotBehavior` using measurable objectives (time-to-peak, stability, recovery after perturbation).
-   - Keep behavior explainable and testable.
-4. Simulation + real-world alignment:
-   - Use `Haden.Simulation` to reproduce expected whirl/decision trajectories before hardware runs.
-   - Compare sim vs hardware outcomes and log divergences.
-5. Paper-oriented outputs:
-   - Capture reproducible metrics, experiment configs, and ablation notes.
-   - Preserve results in a form directly usable for manuscript figures/tables.
+   - `dotnet test Haden.Autonomy.sln --logger "console;verbosity=minimal"`
+2. Hardware link readiness:
+   - Verify `/dev/rfcomm0` is usable.
+   - If needed: `sudo rfcomm release 0 || true` then `sudo rfcomm bind 0 00:16:53:17:9B:47 1`
+   - Run safety command first: `dotnet run --project Haden.HardwareSmoke/Haden.HardwareSmoke.csproj -- --all-stop`
+3. Live experiments:
+   - Run `--seek-max-light` with bump termination enabled.
+   - Test under normal, artificially dimmed, and perturbed lighting.
+   - Ensure robot does not persist in one-direction pathology under uncertainty.
+4. Data and paper outputs:
+   - Extract episode-level summary: stop reason, iterations, reward, peak, recovery events.
+   - Report percentages/counts of `seek`, `hold-uncertain`, `explore-bias`, `explore-flip`, `explore-forced-flip`.
+   - Capture at least one clear case showing uncertainty -> flip -> improvement.
+5. If pathology remains:
+   - tune `HADEN_PEAK_CONFIRM_TICKS`, `HADEN_STUCK_SAME_DIR_LIMIT`, `HADEN_UNCERTAIN_ALTERNATE_STEPS`,
+     `HADEN_BOREDOM_FLAT_LIMIT`, `HADEN_BOREDOM_UNCERTAIN_LIMIT`.
 
-Deliverables required at end of session:
-- Exact code changes with file references.
-- Test/build results and hardware validation results.
-- Quantitative behavior metrics and what improved/regressed.
-- Clear next experimental step toward publication-quality evidence.
+Deliverables required at end of next session:
+- Exact code/doc changes with file references.
+- Build/test results.
+- Hardware run summaries with concrete telemetry evidence.
+- Clear verdict: pathology solved or not solved, with next tuning step.
 
 Guardrails:
-- Do not use or modify `windows-legacy` except as reference.
-- Keep all new logic Linux-first and headless.
-- Keep changes minimal, test-backed, and reproducible.
-- Update `CHANGELOG.md` for every code fix.
+- Keep Linux-first, headless workflow.
+- Do not modify `windows-legacy`.
+- Update `CHANGELOG.md` for every approved code fix.
+- Between runs, keep motors de-powered (`--all-stop`).

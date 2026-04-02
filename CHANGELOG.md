@@ -34,6 +34,18 @@ All notable fixes in this repository should be documented here.
 - `README.md`
   - Bug: naming mixed global light-seeking experiment semantics with scan-head setup/calibration semantics, causing operator confusion.
   - Behavior change: introduced explicit scan-head homing naming (`--home-scan-head`, `HADEN_SCAN_HOME_*`) while keeping legacy `--center-only` and `HADEN_CENTER_*` as backward-compatible aliases.
+- `Haden.RobotBehavior/LightTripletDecisionPolicy.cs`
+- `Haden.HardwareSmoke/Program.cs`
+- `Haden.ConsoleTests/LightTripletDecisionPolicyTests.cs`
+- `README.md`
+- `docs/paper/seek_triplet_theory.md`
+  - Bug: wheel steering could continue in a largely open-loop pattern without explicitly choosing direction from current environmental light gradients.
+  - Behavior change: replaced per-step steering with probe-based triplet sensing (`left/center/right`) on the scan head, added a dedicated triplet decision policy for wheel commands and contrast confidence, and exposed probe/deadband tuning env controls.
+- `Haden.HardwareSmoke/Program.cs`
+- `README.md`
+- `docs/paper/seek_triplet_theory.md`
+  - Bug: even with triplet probing, the robot could still advance when directional evidence was weak, producing behavior that appeared blind instead of deliberative.
+  - Behavior change: enforced strict evidence-gated locomotion (`sense -> decide -> move`) so wheel motors only actuate when triplet direction and minimum confidence are satisfied; added adaptive probe escalation controls for repeated flat scans and documented theory/metrics for paper extrapolation.
 - `Haden.RobotBehavior/LegacyAutonomousLightSeekEngine.cs`
 - `Haden.ConsoleTests/LegacyAutonomousLightSeekEngineTests.cs`
 - `Haden.HardwareSmoke/Haden.HardwareSmoke.csproj`

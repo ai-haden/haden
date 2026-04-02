@@ -154,6 +154,15 @@ namespace Haden.HardwareSmoke
             int wheelStepDegrees = ReadIntEnv("HADEN_WHEEL_STEP_DEGREES", 35);
             bool steerInvert = ReadBoolEnv("HADEN_STEER_INVERT", false);
             bool scanInvert = ReadBoolEnv("HADEN_SCAN_INVERT", false);
+            int scanProbePower = ReadIntEnv("HADEN_SCAN_PROBE_POWER", 22);
+            int scanProbeDegrees = ReadIntEnv("HADEN_SCAN_PROBE_DEGREES", 20);
+            int scanProbeSettleMs = ReadIntEnv("HADEN_SCAN_PROBE_SETTLE_MS", 120);
+            int scanProbePowerMax = ReadIntEnv("HADEN_SCAN_PROBE_POWER_MAX", 40);
+            int scanProbeDegreesMax = ReadIntEnv("HADEN_SCAN_PROBE_DEGREES_MAX", 60);
+            int scanProbePowerStep = ReadIntEnv("HADEN_SCAN_PROBE_POWER_STEP", 4);
+            int scanProbeDegreesStep = ReadIntEnv("HADEN_SCAN_PROBE_DEGREES_STEP", 8);
+            int scanProbeFlatLimit = ReadIntEnv("HADEN_SCAN_PROBE_FLAT_LIMIT", 3);
+            int minDecisionConfidencePercent = ReadIntEnv("HADEN_DECISION_MIN_CONFIDENCE_PERCENT", 6);
             bool scanHomeEnable = ReadBoolEnvAlias("HADEN_SCAN_HOME_ENABLE", "HADEN_CENTER_SCAN_ON_START", true);
             bool scanHomeDisable = ReadBoolEnvAlias("HADEN_SCAN_HOME_DISABLE", "HADEN_CENTER_DISABLE", false);
             bool scanHomeInvert = ReadBoolEnvAlias("HADEN_SCAN_HOME_INVERT", "HADEN_CENTER_INVERT", false);
@@ -162,23 +171,24 @@ namespace Haden.HardwareSmoke
             int scanHomeMaxSweepDegrees = ReadIntEnvAlias("HADEN_SCAN_HOME_MAX_SWEEP_DEGREES", "HADEN_CENTER_MAX_SWEEP_DEGREES", 1080);
             int scanHomeSweepStepDegrees = ReadIntEnvAlias("HADEN_SCAN_HOME_SWEEP_STEP_DEGREES", "HADEN_CENTER_SWEEP_STEP_DEGREES", 40);
             int scanHomeStagnantSteps = ReadIntEnvAlias("HADEN_SCAN_HOME_STAGNANT_STEPS", "HADEN_CENTER_STAGNANT_STEPS", 3);
+            int wheelBasePower = ReadIntEnv("HADEN_WHEEL_BASE_POWER", 35);
+            int wheelMaxPower = ReadIntEnv("HADEN_WHEEL_MAX_POWER", 70);
+            int wheelTurnGain = ReadIntEnv("HADEN_WHEEL_TURN_GAIN", 2);
+            int wheelTurnFloor = ReadIntEnv("HADEN_WHEEL_TURN_FLOOR", 6);
+            int decisionDeadband = ReadIntEnvAlias("HADEN_DECISION_DEADBAND", "HADEN_SEEK_DELTA_DEADBAND", 2);
+            int peakTolerance = ReadIntEnv("HADEN_PEAK_TOLERANCE", 2);
             int smoothWindow = Math.Clamp(ReadIntEnv("HADEN_LIGHT_SMOOTH_WINDOW", 3), 1, 10);
             string databasePath = ReadStringEnv("HADEN_RL_DB_PATH", "output/haden-rl.db");
             var smoother = new LightSignalSmoother(smoothWindow);
             using var store = new SqliteExperimentStore(databasePath);
             ScorecardSummary summary = store.GetScorecardSummary();
 
-            var policy = new PeakLightSteeringPolicy(
-                scanMotorPower: ReadIntEnv("HADEN_SCAN_POWER", 18),
-                scanDegreesMin: ReadIntEnv("HADEN_SCAN_DEGREES_MIN", 10),
-                scanDegreesMax: ReadIntEnv("HADEN_SCAN_DEGREES_MAX", 35),
-                scanDegreesStep: ReadIntEnv("HADEN_SCAN_DEGREES_STEP", 5),
-                wheelBasePower: ReadIntEnv("HADEN_WHEEL_BASE_POWER", 35),
-                wheelMaxPower: ReadIntEnv("HADEN_WHEEL_MAX_POWER", 70),
-                wheelTurnGain: ReadIntEnv("HADEN_WHEEL_TURN_GAIN", 2),
-                wheelTurnFloor: ReadIntEnv("HADEN_WHEEL_TURN_FLOOR", 6),
-                deltaDeadband: ReadIntEnv("HADEN_SEEK_DELTA_DEADBAND", 2),
-                peakTolerance: ReadIntEnv("HADEN_PEAK_TOLERANCE", 2));
+            var decisionPolicy = new LightTripletDecisionPolicy(
+                basePower: wheelBasePower,
+                maxPower: wheelMaxPower,
+                turnGain: wheelTurnGain,
+                turnFloor: wheelTurnFloor,
+                deadband: decisionDeadband);
 
             Console.WriteLine(
                 "Seek setup: lightSensor=" + lightSensorPort +
@@ -193,6 +203,15 @@ namespace Haden.HardwareSmoke
                 ", scanHomeEnable=" + scanHomeEnable +
                 ", scanHomeDisable=" + scanHomeDisable +
                 ", scanHomeInvert=" + scanHomeInvert +
+                ", scanProbePower=" + scanProbePower +
+                ", scanProbePowerMax=" + scanProbePowerMax +
+                ", scanProbePowerStep=" + scanProbePowerStep +
+                ", scanProbeDegrees=" + scanProbeDegrees +
+                ", scanProbeDegreesMax=" + scanProbeDegreesMax +
+                ", scanProbeDegreesStep=" + scanProbeDegreesStep +
+                ", scanProbeSettleMs=" + scanProbeSettleMs +
+                ", scanProbeFlatLimit=" + scanProbeFlatLimit +
+                ", minDecisionConfidencePercent=" + minDecisionConfidencePercent +
                 ", smoothWindow=" + smoothWindow +
                 ", steerInvert=" + steerInvert +
                 ", scanInvert=" + scanInvert +
@@ -229,6 +248,16 @@ namespace Haden.HardwareSmoke
                 (int)bumpSensorPort + 1,
                 maxIterations);
             double totalReward = 0.0;
+            bool hasPreviousCenter = false;
+            int previousCenterSmooth = 0;
+            int peakLightValue = int.MinValue;
+            int peakStableTicks = 0;
+            int recoveryEvents = 0;
+            bool recoveryPending = false;
+            int adaptiveProbePower = Math.Clamp(scanProbePower, 1, 100);
+            int adaptiveProbeDegrees = Math.Clamp(scanProbeDegrees, 5, 90);
+            int flatProbeCount = 0;
+            double minDecisionConfidence = Math.Clamp(minDecisionConfidencePercent / 100.0, 0.0, 1.0);
 
             while (true)
             {
@@ -238,16 +267,77 @@ namespace Haden.HardwareSmoke
                     break;
                 }
 
-                int rawSensor = client.ReadLightSensorValue(lightSensorPort, activeLight);
+                LightTripletSample triplet = ProbeTriplet(
+                    client,
+                    lightSensorPort,
+                    scanMotorPort,
+                    activeLight,
+                    scanInvert,
+                    adaptiveProbePower,
+                    adaptiveProbeDegrees,
+                    scanProbeSettleMs);
+                int rawSensor = triplet.Center;
                 int smoothedSensor = smoother.AddSample(rawSensor);
-                PeakLightSteeringStep step = policy.Advance(smoothedSensor);
+                int delta = hasPreviousCenter ? (smoothedSensor - previousCenterSmooth) : 0;
+                previousCenterSmooth = smoothedSensor;
+                hasPreviousCenter = true;
+
+                if (smoothedSensor > peakLightValue)
+                {
+                    peakLightValue = smoothedSensor;
+                    peakStableTicks = 1;
+                    if (recoveryPending)
+                    {
+                        recoveryEvents++;
+                        recoveryPending = false;
+                    }
+                }
+                else if (Math.Abs(peakLightValue - smoothedSensor) <= peakTolerance)
+                {
+                    peakStableTicks++;
+                    if (recoveryPending)
+                    {
+                        recoveryEvents++;
+                        recoveryPending = false;
+                    }
+                }
+                else
+                {
+                    peakStableTicks = 0;
+                    recoveryPending = true;
+                }
+
+                LightTripletDecision decision = decisionPolicy.Decide(triplet.Left, triplet.Center, triplet.Right);
                 bool bumpPressed = ReadBumpPressed(client, bumpSensorPort, bumpActiveLow);
-                double reward = LightSeekRewardSignal.Compute(step.Delta, bumpPressed);
+                double reward = LightSeekRewardSignal.Compute(delta, bumpPressed);
                 totalReward += reward;
 
-                int scanMotorPower = scanInvert ? -step.ScanMotorPower : step.ScanMotorPower;
-                int leftWheelPower = step.LeftWheelPower;
-                int rightWheelPower = step.RightWheelPower;
+                bool hasDirectionalEvidence =
+                    decision.Direction != TurnDirection.None &&
+                    decision.Confidence >= minDecisionConfidence;
+                if (hasDirectionalEvidence)
+                {
+                    flatProbeCount = 0;
+                    adaptiveProbePower = Math.Clamp(scanProbePower, 1, 100);
+                    adaptiveProbeDegrees = Math.Clamp(scanProbeDegrees, 5, 90);
+                }
+                else
+                {
+                    flatProbeCount++;
+                    if (flatProbeCount >= Math.Max(1, scanProbeFlatLimit))
+                    {
+                        adaptiveProbePower = Math.Min(Math.Clamp(scanProbePowerMax, 1, 100), adaptiveProbePower + Math.Max(1, scanProbePowerStep));
+                        adaptiveProbeDegrees = Math.Min(Math.Clamp(scanProbeDegreesMax, 5, 90), adaptiveProbeDegrees + Math.Max(1, scanProbeDegreesStep));
+                        flatProbeCount = 0;
+                    }
+                }
+
+                int scanDirection = hasDirectionalEvidence
+                    ? (decision.Direction == TurnDirection.Left ? -1 : 1)
+                    : 0;
+                int scanMotorPower = scanDirection == 0 ? 0 : (scanDirection * Math.Clamp(adaptiveProbePower, 1, 100));
+                int leftWheelPower = hasDirectionalEvidence ? decision.LeftWheelPower : 0;
+                int rightWheelPower = hasDirectionalEvidence ? decision.RightWheelPower : 0;
 
                 if (steerInvert)
                 {
@@ -258,7 +348,10 @@ namespace Haden.HardwareSmoke
 
                 if (!bumpPressed)
                 {
-                    client.TurnMotor(scanMotorPort, scanMotorPower, Math.Abs(step.ScanDegrees));
+                    if (scanDirection != 0)
+                    {
+                        client.TurnMotor(scanMotorPort, scanMotorPower, Math.Abs(scanProbeDegrees));
+                    }
                     client.TurnMotor(leftWheelPort, leftWheelPower, Math.Abs(wheelStepDegrees));
                     client.TurnMotor(rightWheelPort, rightWheelPower, Math.Abs(wheelStepDegrees));
                 }
@@ -274,16 +367,16 @@ namespace Haden.HardwareSmoke
                     nowUtc,
                     rawSensor,
                     smoothedSensor,
-                    step.Delta,
+                    delta,
                     reward,
                     bumpPressed,
-                    step.ScanDirection,
+                    scanDirection,
                     scanMotorPower,
                     leftWheelPower,
                     rightWheelPower);
 
-                string stateKey = BuildStateKey(smoothedSensor, step.Delta, bumpPressed);
-                string actionKey = BuildActionKey(step.ScanDirection, leftWheelPower, rightWheelPower);
+                string stateKey = BuildStateKey(smoothedSensor, delta, bumpPressed);
+                string actionKey = BuildActionKey(scanDirection, leftWheelPower, rightWheelPower);
                 ScorecardSnapshot scorecard = store.AppendRlPoint(
                     sessionId,
                     stateKey,
@@ -294,16 +387,24 @@ namespace Haden.HardwareSmoke
 
                 Console.WriteLine(
                     "iter=" + completedIterations +
+                    " L=" + triplet.Left +
                     " sensorRaw=" + rawSensor +
                     " sensorSmooth=" + smoothedSensor +
-                    " delta=" + step.Delta +
+                    " R=" + triplet.Right +
+                    " delta=" + delta +
                     " reward=" + reward.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture) +
                     " confidence=" + scorecard.Confidence.ToString("0.000", System.Globalization.CultureInfo.InvariantCulture) +
-                    " peak=" + step.PeakLightValue +
-                    " stableTicks=" + step.PeakStableTicks +
-                    " recoveries=" + step.RecoveryEvents +
+                    " probeConfidence=" + decision.Confidence.ToString("0.000", System.Globalization.CultureInfo.InvariantCulture) +
+                    " minProbeConfidence=" + minDecisionConfidence.ToString("0.000", System.Globalization.CultureInfo.InvariantCulture) +
+                    " actionMode=" + (hasDirectionalEvidence ? "seek" : "hold") +
+                    " adaptiveProbePower=" + adaptiveProbePower +
+                    " adaptiveProbeDegrees=" + adaptiveProbeDegrees +
+                    " flatProbeCount=" + flatProbeCount +
+                    " peak=" + peakLightValue +
+                    " stableTicks=" + peakStableTicks +
+                    " recoveries=" + recoveryEvents +
                     " bump=" + bumpPressed +
-                    " scanDir=" + step.ScanDirection +
+                    " scanDir=" + scanDirection +
                     " scanPwr=" + scanMotorPower +
                     " leftPwr=" + leftWheelPower +
                     " rightPwr=" + rightWheelPower);
@@ -333,7 +434,7 @@ namespace Haden.HardwareSmoke
                 endedAt,
                 stopReason,
                 completedIterations,
-                policy.PeakLightValue,
+                peakLightValue == int.MinValue ? 0 : peakLightValue,
                 totalReward,
                 success);
             Console.WriteLine(
@@ -385,6 +486,39 @@ namespace Haden.HardwareSmoke
         {
             bool pressed = client.ReadTouchSensorPressed(bumpSensorPort);
             return activeLow ? !pressed : pressed;
+        }
+
+        private static LightTripletSample ProbeTriplet(
+            NxtBrickClient client,
+            NxtSensorPort lightSensorPort,
+            NxtMotorPort scanMotorPort,
+            bool activeLight,
+            bool scanInvert,
+            int probePower,
+            int probeDegrees,
+            int settleMs)
+        {
+            int safePower = Math.Clamp(probePower, 1, 100);
+            int safeDegrees = Math.Clamp(probeDegrees, 5, 90);
+            int safeSettle = Math.Clamp(settleMs, 20, 2000);
+            int leftDirection = scanInvert ? 1 : -1;
+            int rightDirection = -leftDirection;
+
+            int center = client.ReadLightSensorValue(lightSensorPort, activeLight);
+
+            client.TurnMotor(scanMotorPort, leftDirection * safePower, safeDegrees);
+            System.Threading.Thread.Sleep(safeSettle);
+            int left = client.ReadLightSensorValue(lightSensorPort, activeLight);
+
+            client.TurnMotor(scanMotorPort, rightDirection * safePower, safeDegrees * 2);
+            System.Threading.Thread.Sleep(safeSettle);
+            int right = client.ReadLightSensorValue(lightSensorPort, activeLight);
+
+            client.TurnMotor(scanMotorPort, leftDirection * safePower, safeDegrees);
+            System.Threading.Thread.Sleep(safeSettle);
+            client.BrakeMotor(scanMotorPort);
+
+            return new LightTripletSample(left, center, right);
         }
 
         private static string BuildStateKey(int sensorSmooth, int delta, bool bumpPressed)
@@ -601,6 +735,20 @@ namespace Haden.HardwareSmoke
         {
             string raw = Environment.GetEnvironmentVariable(name);
             return !string.IsNullOrWhiteSpace(raw);
+        }
+
+        private readonly struct LightTripletSample
+        {
+            public LightTripletSample(int left, int center, int right)
+            {
+                Left = left;
+                Center = center;
+                Right = right;
+            }
+
+            public int Left { get; }
+            public int Center { get; }
+            public int Right { get; }
         }
     }
 }

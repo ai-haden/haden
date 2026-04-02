@@ -12,14 +12,22 @@ namespace Haden.HardwareSmoke
             bool seekMaxLightMode = HasFlag(args, "--seek-max-light");
             bool homeScanHeadMode = HasFlag(args, "--home-scan-head") || HasFlag(args, "--center-only");
             bool scorecardMode = HasFlag(args, "--scorecard");
+            bool allStopMode = HasFlag(args, "--all-stop");
             string port = ResolvePort(args);
             int retries = ReadIntEnv("HADEN_AUTOCONNECT_RETRIES", 5);
             int delayMs = ReadIntEnv("HADEN_AUTOCONNECT_DELAY_MS", 1000);
+            string mode = seekMaxLightMode
+                ? "seek-max-light"
+                : (homeScanHeadMode
+                    ? "home-scan-head"
+                    : (scorecardMode
+                        ? "scorecard"
+                        : (allStopMode ? "all-stop" : "smoke")));
 
             Console.WriteLine("Haden hardware smoke starting...");
             Console.WriteLine("Port: " + port);
             Console.WriteLine("Retries: " + retries + ", DelayMs: " + delayMs);
-            Console.WriteLine("Mode: " + (seekMaxLightMode ? "seek-max-light" : "smoke"));
+            Console.WriteLine("Mode: " + mode);
 
             try
             {
@@ -32,18 +40,32 @@ namespace Haden.HardwareSmoke
                 using var client = new NxtBrickClient(port);
                 client.ConnectWithRetry(retries, delayMs);
                 client.KeepAlive();
-                if (homeScanHeadMode)
+                try
                 {
-                    RunHomeScanHead(client);
+                    if (allStopMode)
+                    {
+                        int battery = client.GetBatteryLevel();
+                        Console.WriteLine("Connected to NXT. Battery mV: " + battery);
+                        SafeAllMotorsOff(client);
+                        Console.WriteLine("All-stop complete.");
+                    }
+                    else if (homeScanHeadMode)
+                    {
+                        RunHomeScanHead(client);
+                    }
+                    else if (seekMaxLightMode)
+                    {
+                        RunSeekMaxLight(client);
+                    }
+                    else
+                    {
+                        int battery = client.GetBatteryLevel();
+                        Console.WriteLine("Connected to NXT. Battery mV: " + battery);
+                    }
                 }
-                else if (seekMaxLightMode)
+                finally
                 {
-                    RunSeekMaxLight(client);
-                }
-                else
-                {
-                    int battery = client.GetBatteryLevel();
-                    Console.WriteLine("Connected to NXT. Battery mV: " + battery);
+                    SafeAllMotorsOff(client);
                 }
 
                 client.Disconnect();
@@ -163,6 +185,16 @@ namespace Haden.HardwareSmoke
             int scanProbeDegreesStep = ReadIntEnv("HADEN_SCAN_PROBE_DEGREES_STEP", 8);
             int scanProbeFlatLimit = ReadIntEnv("HADEN_SCAN_PROBE_FLAT_LIMIT", 3);
             int minDecisionConfidencePercent = ReadIntEnv("HADEN_DECISION_MIN_CONFIDENCE_PERCENT", 6);
+            int boredomDeltaThreshold = ReadIntEnv("HADEN_BOREDOM_DELTA_THRESHOLD", 1);
+            int boredomFlatLimit = ReadIntEnv("HADEN_BOREDOM_FLAT_LIMIT", 6);
+            int boredomUncertainLimit = ReadIntEnv("HADEN_BOREDOM_UNCERTAIN_LIMIT", 4);
+            int peakUnsureMargin = ReadIntEnv("HADEN_PEAK_UNSURE_MARGIN", 2);
+            int peakConfirmTicks = ReadIntEnv("HADEN_PEAK_CONFIRM_TICKS", 4);
+            int stuckSameDirectionLimit = ReadIntEnv("HADEN_STUCK_SAME_DIR_LIMIT", 5);
+            int uncertainAlternateSteps = ReadIntEnv("HADEN_UNCERTAIN_ALTERNATE_STEPS", 3);
+            int explorationWheelPower = ReadIntEnv("HADEN_EXPLORATION_WHEEL_POWER", 28);
+            int explorationTurnMagnitude = ReadIntEnv("HADEN_EXPLORATION_TURN_MAGNITUDE", 14);
+            bool seekScanNudgeEnable = ReadBoolEnv("HADEN_SEEK_SCAN_NUDGE_ENABLE", false);
             bool scanHomeEnable = ReadBoolEnvAlias("HADEN_SCAN_HOME_ENABLE", "HADEN_CENTER_SCAN_ON_START", true);
             bool scanHomeDisable = ReadBoolEnvAlias("HADEN_SCAN_HOME_DISABLE", "HADEN_CENTER_DISABLE", false);
             bool scanHomeInvert = ReadBoolEnvAlias("HADEN_SCAN_HOME_INVERT", "HADEN_CENTER_INVERT", false);
@@ -189,6 +221,14 @@ namespace Haden.HardwareSmoke
                 turnGain: wheelTurnGain,
                 turnFloor: wheelTurnFloor,
                 deadband: decisionDeadband);
+            var boredomPolicy = new BoredomDirectionPolicy(
+                flatDeltaThreshold: boredomDeltaThreshold,
+                flatLimit: boredomFlatLimit,
+                uncertainLimit: boredomUncertainLimit,
+                peakUnsureMargin: peakUnsureMargin,
+                peakConfirmTicks: peakConfirmTicks,
+                stuckSameDirectionLimit: stuckSameDirectionLimit,
+                uncertainAlternateSteps: uncertainAlternateSteps);
 
             Console.WriteLine(
                 "Seek setup: lightSensor=" + lightSensorPort +
@@ -212,6 +252,16 @@ namespace Haden.HardwareSmoke
                 ", scanProbeSettleMs=" + scanProbeSettleMs +
                 ", scanProbeFlatLimit=" + scanProbeFlatLimit +
                 ", minDecisionConfidencePercent=" + minDecisionConfidencePercent +
+                ", boredomDeltaThreshold=" + boredomDeltaThreshold +
+                ", boredomFlatLimit=" + boredomFlatLimit +
+                ", boredomUncertainLimit=" + boredomUncertainLimit +
+                ", peakUnsureMargin=" + peakUnsureMargin +
+                ", peakConfirmTicks=" + peakConfirmTicks +
+                ", stuckSameDirectionLimit=" + stuckSameDirectionLimit +
+                ", uncertainAlternateSteps=" + uncertainAlternateSteps +
+                ", explorationWheelPower=" + explorationWheelPower +
+                ", explorationTurnMagnitude=" + explorationTurnMagnitude +
+                ", seekScanNudgeEnable=" + seekScanNudgeEnable +
                 ", smoothWindow=" + smoothWindow +
                 ", steerInvert=" + steerInvert +
                 ", scanInvert=" + scanInvert +
@@ -258,6 +308,15 @@ namespace Haden.HardwareSmoke
             int adaptiveProbeDegrees = Math.Clamp(scanProbeDegrees, 5, 90);
             int flatProbeCount = 0;
             double minDecisionConfidence = Math.Clamp(minDecisionConfidencePercent / 100.0, 0.0, 1.0);
+            var boredomState = new BoredomDirectionState(
+                biasDirection: 1,
+                flatCount: 0,
+                uncertainCount: 0,
+                lastActionDirection: 0,
+                sameDirectionStuckCount: 0,
+                uncertainExploreCount: 0);
+            int safeExplorePower = Math.Clamp(explorationWheelPower, 0, 100);
+            int safeExploreTurn = Math.Clamp(explorationTurnMagnitude, 0, 100);
 
             while (true)
             {
@@ -332,12 +391,42 @@ namespace Haden.HardwareSmoke
                     }
                 }
 
-                int scanDirection = hasDirectionalEvidence
+                int evidenceDirection = hasDirectionalEvidence
                     ? (decision.Direction == TurnDirection.Left ? -1 : 1)
                     : 0;
+                BoredomDirectionStep boredomStep = boredomPolicy.Next(
+                    boredomState,
+                    hasDirectionalEvidence,
+                    evidenceDirection,
+                    delta,
+                    smoothedSensor,
+                    peakLightValue,
+                    peakStableTicks);
+                boredomState = boredomStep.State;
+
+                int scanDirection = boredomStep.ActionDirection;
                 int scanMotorPower = scanDirection == 0 ? 0 : (scanDirection * Math.Clamp(adaptiveProbePower, 1, 100));
-                int leftWheelPower = hasDirectionalEvidence ? decision.LeftWheelPower : 0;
-                int rightWheelPower = hasDirectionalEvidence ? decision.RightWheelPower : 0;
+                int leftWheelPower = 0;
+                int rightWheelPower = 0;
+
+                if (hasDirectionalEvidence)
+                {
+                    leftWheelPower = decision.LeftWheelPower;
+                    rightWheelPower = decision.RightWheelPower;
+                }
+                else if (boredomStep.Exploring && scanDirection != 0)
+                {
+                    if (scanDirection < 0)
+                    {
+                        leftWheelPower = Math.Clamp(safeExplorePower - safeExploreTurn, 0, 100);
+                        rightWheelPower = Math.Clamp(safeExplorePower + safeExploreTurn, 0, 100);
+                    }
+                    else
+                    {
+                        leftWheelPower = Math.Clamp(safeExplorePower + safeExploreTurn, 0, 100);
+                        rightWheelPower = Math.Clamp(safeExplorePower - safeExploreTurn, 0, 100);
+                    }
+                }
 
                 if (steerInvert)
                 {
@@ -348,9 +437,9 @@ namespace Haden.HardwareSmoke
 
                 if (!bumpPressed)
                 {
-                    if (scanDirection != 0)
+                    if (seekScanNudgeEnable && scanDirection != 0)
                     {
-                        client.TurnMotor(scanMotorPort, scanMotorPower, Math.Abs(scanProbeDegrees));
+                        client.TurnMotor(scanMotorPort, scanMotorPower, Math.Abs(adaptiveProbeDegrees));
                     }
                     client.TurnMotor(leftWheelPort, leftWheelPower, Math.Abs(wheelStepDegrees));
                     client.TurnMotor(rightWheelPort, rightWheelPower, Math.Abs(wheelStepDegrees));
@@ -396,10 +485,25 @@ namespace Haden.HardwareSmoke
                     " confidence=" + scorecard.Confidence.ToString("0.000", System.Globalization.CultureInfo.InvariantCulture) +
                     " probeConfidence=" + decision.Confidence.ToString("0.000", System.Globalization.CultureInfo.InvariantCulture) +
                     " minProbeConfidence=" + minDecisionConfidence.ToString("0.000", System.Globalization.CultureInfo.InvariantCulture) +
-                    " actionMode=" + (hasDirectionalEvidence ? "seek" : "hold") +
+                    " actionMode=" + (
+                        hasDirectionalEvidence
+                            ? "seek"
+                            : (boredomStep.Exploring
+                                ? (boredomStep.ForcedFlip
+                                    ? "explore-forced-flip"
+                                    : (boredomStep.BoredomTriggered ? "explore-flip" : "explore-bias"))
+                                : (boredomStep.NearPeakConfirmed ? "hold-near-peak" : "hold-uncertain"))) +
                     " adaptiveProbePower=" + adaptiveProbePower +
                     " adaptiveProbeDegrees=" + adaptiveProbeDegrees +
                     " flatProbeCount=" + flatProbeCount +
+                    " boredomFlatCount=" + boredomState.FlatCount +
+                    " boredomUncertainCount=" + boredomState.UncertainCount +
+                    " boredomBiasDir=" + boredomState.BiasDirection +
+                    " boredomTriggered=" + boredomStep.BoredomTriggered +
+                    " forcedFlip=" + boredomStep.ForcedFlip +
+                    " sameDirStuckCount=" + boredomState.SameDirectionStuckCount +
+                    " uncertainExploreCount=" + boredomState.UncertainExploreCount +
+                    " nearPeakConfirmed=" + boredomStep.NearPeakConfirmed +
                     " peak=" + peakLightValue +
                     " stableTicks=" + peakStableTicks +
                     " recoveries=" + recoveryEvents +
@@ -478,8 +582,48 @@ namespace Haden.HardwareSmoke
                     scanHomeStagnantSteps);
             }
 
-            client.BrakeMotor(scanMotorPort);
+            SafeAllMotorsOff(client);
             Console.WriteLine("Home-scan-head complete.");
+        }
+
+        private static void SafeAllMotorsOff(NxtBrickClient client)
+        {
+            if (client == null)
+            {
+                return;
+            }
+
+            SafeMotorOff(client, NxtMotorPort.PortA);
+            SafeMotorOff(client, NxtMotorPort.PortB);
+            SafeMotorOff(client, NxtMotorPort.PortC);
+        }
+
+        private static void SafeMotorOff(NxtBrickClient client, NxtMotorPort port)
+        {
+            try
+            {
+                client.BrakeMotor(port);
+            }
+            catch
+            {
+                // Best-effort safety path; ignore shutdown faults.
+            }
+
+            try
+            {
+                client.SetOutputState(
+                    port,
+                    0,
+                    NxtMotorMode.MotorOn | NxtMotorMode.Brake,
+                    NxtMotorRegulationMode.Idle,
+                    0,
+                    NxtMotorRunState.Idle,
+                    0);
+            }
+            catch
+            {
+                // Best-effort safety path; ignore shutdown faults.
+            }
         }
 
         private static bool ReadBumpPressed(NxtBrickClient client, NxtSensorPort bumpSensorPort, bool activeLow)

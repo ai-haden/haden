@@ -80,11 +80,16 @@ string html = tree.ToHtmlTree();
   - `dotnet run --project Haden.HardwareSmoke/Haden.HardwareSmoke.csproj -- --seek-max-light`
   - Scan-head homing mode: `dotnet run --project Haden.HardwareSmoke/Haden.HardwareSmoke.csproj -- --home-scan-head`
   - Scorecard report mode: `dotnet run --project Haden.HardwareSmoke/Haden.HardwareSmoke.csproj -- --scorecard`
+  - Immediate motor de-power mode: `dotnet run --project Haden.HardwareSmoke/Haden.HardwareSmoke.csproj -- --all-stop`
   - Episode termination: front bump sensor trigger (primary), with `HADEN_SEEK_MAX_ITERATIONS` safety cutoff.
+  - Safety behavior: motors A/B/C are best-effort de-powered in a `finally` path after each hardware run mode.
   - Defaults: `HADEN_LIGHT_SCAN_MOTOR_PORT=0` (A), `HADEN_LEFT_WHEEL_MOTOR_PORT=1` (B), `HADEN_RIGHT_WHEEL_MOTOR_PORT=2` (C)
   - Control tuning: `HADEN_SCAN_POWER`, `HADEN_SCAN_DEGREES_MIN`, `HADEN_SCAN_DEGREES_MAX`, `HADEN_SCAN_DEGREES_STEP`, `HADEN_WHEEL_BASE_POWER`, `HADEN_WHEEL_MAX_POWER`, `HADEN_WHEEL_TURN_GAIN`, `HADEN_WHEEL_TURN_FLOOR`, `HADEN_SEEK_DELTA_DEADBAND`, `HADEN_PEAK_TOLERANCE`, `HADEN_WHEEL_STEP_DEGREES`
   - Probe-based scan decisioning: `HADEN_SCAN_PROBE_POWER`, `HADEN_SCAN_PROBE_DEGREES`, `HADEN_SCAN_PROBE_SETTLE_MS`, `HADEN_DECISION_DEADBAND`
   - Evidence-gated seek (sense then move): `HADEN_DECISION_MIN_CONFIDENCE_PERCENT`, `HADEN_SCAN_PROBE_FLAT_LIMIT`, `HADEN_SCAN_PROBE_POWER_MAX`, `HADEN_SCAN_PROBE_DEGREES_MAX`, `HADEN_SCAN_PROBE_POWER_STEP`, `HADEN_SCAN_PROBE_DEGREES_STEP`
+  - Boredom-based direction reversal: `HADEN_BOREDOM_DELTA_THRESHOLD`, `HADEN_BOREDOM_FLAT_LIMIT`, `HADEN_BOREDOM_UNCERTAIN_LIMIT`, `HADEN_PEAK_UNSURE_MARGIN`, `HADEN_EXPLORATION_WHEEL_POWER`, `HADEN_EXPLORATION_TURN_MAGNITUDE`
+  - Anti-pathology controls: `HADEN_PEAK_CONFIRM_TICKS`, `HADEN_STUCK_SAME_DIR_LIMIT`, `HADEN_UNCERTAIN_ALTERNATE_STEPS`
+  - Optional post-decision scan nudge (off by default to avoid end-stop banging): `HADEN_SEEK_SCAN_NUDGE_ENABLE`
   - Steering polarity and signal conditioning: `HADEN_STEER_INVERT` (`0`/`1`), `HADEN_SCAN_INVERT` (`0`/`1`), `HADEN_LIGHT_SMOOTH_WINDOW` (`1-10`, default `3`)
   - Bump-sensor control: `HADEN_BUMP_SENSOR_PORT` (default `1`), `HADEN_BUMP_ACTIVE_LOW` (`0`/`1`)
   - Start-of-run scan-head homing: `HADEN_SCAN_HOME_ENABLE` (`0`/`1`, default `1`), `HADEN_SCAN_HOME_DISABLE` (`0`/`1`, default `0`), `HADEN_SCAN_HOME_INVERT` (`0`/`1`, default `0`), `HADEN_SCAN_HOME_POWER` (default `22`), `HADEN_SCAN_HOME_SETTLE_MS` (default `250`), `HADEN_SCAN_HOME_MAX_SWEEP_DEGREES` (default `1080`), `HADEN_SCAN_HOME_SWEEP_STEP_DEGREES` (default `40`), `HADEN_SCAN_HOME_STAGNANT_STEPS` (default `3`)

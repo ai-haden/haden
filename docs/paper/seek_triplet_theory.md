@@ -20,7 +20,7 @@ Each iteration executes a strict sequence:
    - Require directional evidence and minimum confidence before allowing movement.
 3. Move:
    - If evidence passes threshold: steer wheel motors B/C toward brighter side.
-   - If evidence is weak/flat: hold wheel movement (`actionMode=hold`) and continue probing.
+   - If evidence is weak/flat: either hold briefly (`actionMode=hold`) or perform boredom-driven exploratory steering with alternating direction bias.
 4. Learn:
    - Persist state/action/reward into SQLite (`experiment_session`, `experiment_step`, `rl_point`, `rl_scorecard`).
 5. Terminate episode:
@@ -35,6 +35,8 @@ A flat triplet can mean either:
 
 The implementation escalates probe amplitude/power after repeated flat observations, then retries sensing before locomotion.
 This preserves the sense-first principle while improving observability.
+
+When uncertainty persists and light change remains flat while not near a confirmed peak, a boredom cue flips exploration bias (left/right alternation). A same-direction stuck guard can force immediate reversal if repeated moves in one direction do not improve light.
 
 ## Extrapolation for paper analysis
 

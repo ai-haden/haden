@@ -46,6 +46,17 @@ All notable fixes in this repository should be documented here.
 - `docs/paper/seek_triplet_theory.md`
   - Bug: even with triplet probing, the robot could still advance when directional evidence was weak, producing behavior that appeared blind instead of deliberative.
   - Behavior change: enforced strict evidence-gated locomotion (`sense -> decide -> move`) so wheel motors only actuate when triplet direction and minimum confidence are satisfied; added adaptive probe escalation controls for repeated flat scans and documented theory/metrics for paper extrapolation.
+- `Haden.RobotBehavior/BoredomDirectionPolicy.cs`
+- `Haden.ConsoleTests/BoredomDirectionPolicyTests.cs`
+- `Haden.HardwareSmoke/Program.cs`
+- `README.md`
+- `docs/paper/seek_triplet_theory.md`
+  - Bug: under prolonged uncertainty and flat light values, seek behavior could keep favoring one direction and physically bang the scan head against an end-stop instead of trying the opposite direction.
+  - Behavior change: introduced boredom-cue exploration policy that flips directional bias when uncertain+flat conditions persist and the robot is not near a confirmed peak, added uncertain-step alternation and same-direction stuck forced-flip guards, added exploratory wheel steering in the bias direction, disabled post-decision scan-head nudge by default to avoid repeated end-stop pushes, and documented new controls/telemetry for paper interpretation.
+- `Haden.HardwareSmoke/Program.cs`
+- `README.md`
+  - Bug: motors could remain energized between experiments (audible humming) when runs completed or failed without an explicit global all-stop path.
+  - Behavior change: added best-effort global motor de-power safety handling for ports A/B/C in `finally` flow after hardware modes, and added `--all-stop` mode for manual immediate motor shutdown between experiments.
 - `Haden.RobotBehavior/LegacyAutonomousLightSeekEngine.cs`
 - `Haden.ConsoleTests/LegacyAutonomousLightSeekEngineTests.cs`
 - `Haden.HardwareSmoke/Haden.HardwareSmoke.csproj`

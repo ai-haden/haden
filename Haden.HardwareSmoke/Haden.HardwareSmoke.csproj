@@ -9,6 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Haden.NxtSDK\Haden.NxtSDK.csproj" />
     <ProjectReference Include="..\Haden.RobotBehavior\Haden.RobotBehavior.csproj" />
   </ItemGroup>

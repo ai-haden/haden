@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.0" />
     <PackageReference Include="NUnit" Version="3.13.3" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.4.2">
       <PrivateAssets>all</PrivateAssets>
@@ -23,6 +24,7 @@
     <ProjectReference Include="..\Haden.RobotBehavior\Haden.RobotBehavior.csproj" />
     <ProjectReference Include="..\Haden.Simulation\Haden.Simulation.csproj" />
     <ProjectReference Include="..\Haden.NxtSDK\Haden.NxtSDK.csproj" />
+    <ProjectReference Include="..\Haden.HardwareSmoke\Haden.HardwareSmoke.csproj" />
     <ProjectReference Include="..\Haden.LinuxMigrationReview\Haden.LinuxMigrationReview.csproj" />
   </ItemGroup>
 </Project>

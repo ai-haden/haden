@@ -128,14 +128,16 @@ namespace Haden.HardwareSmoke
             int battery = client.GetBatteryLevel();
             Console.WriteLine("Connected to NXT. Battery mV: " + battery);
 
-            NxtSensorPort sensorPort = ReadSensorPortEnv("HADEN_LIGHT_SENSOR_PORT", NxtSensorPort.Port3);
+            NxtSensorPort lightSensorPort = ReadSensorPortEnv("HADEN_LIGHT_SENSOR_PORT", NxtSensorPort.Port3);
+            NxtSensorPort bumpSensorPort = ReadSensorPortEnv("HADEN_BUMP_SENSOR_PORT", NxtSensorPort.Port1);
             NxtMotorPort scanMotorPort = ReadMotorPortEnv("HADEN_LIGHT_SCAN_MOTOR_PORT", NxtMotorPort.PortA);
             NxtMotorPort leftWheelPort = ReadMotorPortEnv("HADEN_LEFT_WHEEL_MOTOR_PORT", NxtMotorPort.PortB);
             NxtMotorPort rightWheelPort = ReadMotorPortEnv("HADEN_RIGHT_WHEEL_MOTOR_PORT", NxtMotorPort.PortC);
 
-            int iterations = ReadIntEnv("HADEN_SEEK_ITERATIONS", 30);
+            int maxIterations = ReadIntEnv("HADEN_SEEK_MAX_ITERATIONS", ReadIntEnv("HADEN_SEEK_ITERATIONS", 300));
             int settleDelayMs = ReadIntEnv("HADEN_SEEK_SETTLE_DELAY_MS", 600);
             bool activeLight = ReadIntEnv("HADEN_LIGHT_SENSOR_ACTIVE", 0) == 1;
+            bool bumpActiveLow = ReadBoolEnv("HADEN_BUMP_ACTIVE_LOW", false);
             int wheelStepDegrees = ReadIntEnv("HADEN_WHEEL_STEP_DEGREES", 35);
             bool steerInvert = ReadBoolEnv("HADEN_STEER_INVERT", false);
             bool scanInvert = ReadBoolEnv("HADEN_SCAN_INVERT", false);
@@ -155,22 +157,36 @@ namespace Haden.HardwareSmoke
                 peakTolerance: ReadIntEnv("HADEN_PEAK_TOLERANCE", 2));
 
             Console.WriteLine(
-                "Seek setup: sensor=" + sensorPort +
+                "Seek setup: lightSensor=" + lightSensorPort +
+                ", bumpSensor=" + bumpSensorPort +
                 ", scanMotor=" + scanMotorPort +
                 ", leftWheel=" + leftWheelPort +
                 ", rightWheel=" + rightWheelPort +
-                ", iterations=" + iterations +
+                ", maxIterations=" + maxIterations +
                 ", wheelStepDegrees=" + wheelStepDegrees +
                 ", active=" + activeLight +
+                ", bumpActiveLow=" + bumpActiveLow +
                 ", smoothWindow=" + smoothWindow +
                 ", steerInvert=" + steerInvert +
                 ", scanInvert=" + scanInvert);
 
-            for (int i = 0; i < iterations; i++)
+            int completedIterations = 0;
+            string stopReason = "max-iterations";
+            var startedAt = DateTime.UtcNow;
+
+            while (true)
             {
-                int rawSensor = client.ReadLightSensorValue(sensorPort, activeLight);
+                if (maxIterations > 0 && completedIterations >= maxIterations)
+                {
+                    stopReason = "max-iterations";
+                    break;
+                }
+
+                int rawSensor = client.ReadLightSensorValue(lightSensorPort, activeLight);
                 int smoothedSensor = smoother.AddSample(rawSensor);
                 PeakLightSteeringStep step = policy.Advance(smoothedSensor);
+                bool bumpPressed = ReadBumpPressed(client, bumpSensorPort, bumpActiveLow);
+                double reward = LightSeekRewardSignal.Compute(step.Delta, bumpPressed);
 
                 int scanMotorPower = scanInvert ? -step.ScanMotorPower : step.ScanMotorPower;
                 int leftWheelPower = step.LeftWheelPower;
@@ -183,18 +199,27 @@ namespace Haden.HardwareSmoke
                     rightWheelPower = swap;
                 }
 
-                client.TurnMotor(scanMotorPort, scanMotorPower, Math.Abs(step.ScanDegrees));
-                client.TurnMotor(leftWheelPort, leftWheelPower, Math.Abs(wheelStepDegrees));
-                client.TurnMotor(rightWheelPort, rightWheelPower, Math.Abs(wheelStepDegrees));
+                if (!bumpPressed)
+                {
+                    client.TurnMotor(scanMotorPort, scanMotorPower, Math.Abs(step.ScanDegrees));
+                    client.TurnMotor(leftWheelPort, leftWheelPower, Math.Abs(wheelStepDegrees));
+                    client.TurnMotor(rightWheelPort, rightWheelPower, Math.Abs(wheelStepDegrees));
+                }
+                else
+                {
+                    stopReason = "bump-pressed";
+                }
 
                 Console.WriteLine(
-                    "iter=" + i +
+                    "iter=" + completedIterations +
                     " sensorRaw=" + rawSensor +
                     " sensorSmooth=" + smoothedSensor +
                     " delta=" + step.Delta +
+                    " reward=" + reward.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture) +
                     " peak=" + step.PeakLightValue +
                     " stableTicks=" + step.PeakStableTicks +
                     " recoveries=" + step.RecoveryEvents +
+                    " bump=" + bumpPressed +
                     " scanDir=" + step.ScanDirection +
                     " scanPwr=" + scanMotorPower +
                     " leftPwr=" + leftWheelPower +
@@ -205,12 +230,29 @@ namespace Haden.HardwareSmoke
                 {
                     System.Threading.Thread.Sleep(settleDelayMs);
                 }
+
+                completedIterations++;
+
+                if (bumpPressed)
+                {
+                    break;
+                }
             }
 
             client.BrakeMotor(scanMotorPort);
             client.BrakeMotor(leftWheelPort);
             client.BrakeMotor(rightWheelPort);
-            Console.WriteLine("Seek complete.");
+            double elapsedSeconds = (DateTime.UtcNow - startedAt).TotalSeconds;
+            Console.WriteLine(
+                "Seek complete. reason=" + stopReason +
+                ", iterations=" + completedIterations +
+                ", elapsedSec=" + elapsedSeconds.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture));
+        }
+
+        private static bool ReadBumpPressed(NxtBrickClient client, NxtSensorPort bumpSensorPort, bool activeLow)
+        {
+            bool pressed = client.ReadTouchSensorPressed(bumpSensorPort);
+            return activeLow ? !pressed : pressed;
         }
 
         private static NxtSensorPort ReadSensorPortEnv(string name, NxtSensorPort defaultPort)

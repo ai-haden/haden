@@ -158,6 +158,16 @@ namespace Haden.NxtSDK
             return GetInputValues(port).ScaledValue;
         }
 
+        public bool ReadTouchSensorPressed(NxtSensorPort port)
+        {
+            SetInputMode(
+                port,
+                NxtSensorType.Switch,
+                NxtSensorMode.Boolean);
+
+            return GetInputValues(port).ScaledValue != 0;
+        }
+
         public void SetOutputState(
             NxtMotorPort port,
             sbyte power,

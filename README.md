@@ -77,9 +77,11 @@ string html = tree.ToHtmlTree();
 - Detailed pairing/connectivity guide: `NXTRobot Setup.md`
 - Peak-light steering mode (sensor motor A + wheel motors B/C):
   - `dotnet run --project Haden.HardwareSmoke/Haden.HardwareSmoke.csproj -- --seek-max-light`
+  - Episode termination: front bump sensor trigger (primary), with `HADEN_SEEK_MAX_ITERATIONS` safety cutoff.
   - Defaults: `HADEN_LIGHT_SCAN_MOTOR_PORT=0` (A), `HADEN_LEFT_WHEEL_MOTOR_PORT=1` (B), `HADEN_RIGHT_WHEEL_MOTOR_PORT=2` (C)
   - Control tuning: `HADEN_SCAN_POWER`, `HADEN_SCAN_DEGREES_MIN`, `HADEN_SCAN_DEGREES_MAX`, `HADEN_SCAN_DEGREES_STEP`, `HADEN_WHEEL_BASE_POWER`, `HADEN_WHEEL_MAX_POWER`, `HADEN_WHEEL_TURN_GAIN`, `HADEN_WHEEL_TURN_FLOOR`, `HADEN_SEEK_DELTA_DEADBAND`, `HADEN_PEAK_TOLERANCE`, `HADEN_WHEEL_STEP_DEGREES`
   - Steering polarity and signal conditioning: `HADEN_STEER_INVERT` (`0`/`1`), `HADEN_SCAN_INVERT` (`0`/`1`), `HADEN_LIGHT_SMOOTH_WINDOW` (`1-10`, default `3`)
+  - Bump-sensor control: `HADEN_BUMP_SENSOR_PORT` (default `1`), `HADEN_BUMP_ACTIVE_LOW` (`0`/`1`)
 
 ## Linux Robot Behavior
 

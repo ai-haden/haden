@@ -50,6 +50,44 @@ namespace Haden.ConsoleTests
         }
 
         [Test]
+        public void ReadTouchSensorPressed_SendsSwitchBooleanInputModeAndParsesPress()
+        {
+            var transport = new FakeTransport();
+            transport.EnqueueReply(Packet(0x02, (byte)NxtCommand.SetInputMode, 0x00));
+            transport.EnqueueReply(Packet(
+                0x02,
+                (byte)NxtCommand.GetInputValues,
+                0x00,
+                (byte)NxtSensorPort.Port1,
+                0x01,
+                0x01,
+                (byte)NxtSensorType.Switch,
+                (byte)NxtSensorMode.Boolean,
+                0x00,
+                0x00,
+                0x00,
+                0x00,
+                0x01,
+                0x00,
+                0x00,
+                0x00,
+                0x00));
+
+            var client = new NxtBrickClient(transport);
+            client.Connect();
+
+            bool pressed = client.ReadTouchSensorPressed(NxtSensorPort.Port1);
+
+            Assert.That(pressed, Is.True);
+            Assert.That(transport.Writes.Count, Is.EqualTo(2));
+
+            byte[] setInputMode = transport.Writes[0];
+            Assert.That(setInputMode[4], Is.EqualTo((byte)NxtSensorPort.Port1));
+            Assert.That(setInputMode[5], Is.EqualTo((byte)NxtSensorType.Switch));
+            Assert.That(setInputMode[6], Is.EqualTo((byte)NxtSensorMode.Boolean));
+        }
+
+        [Test]
         public void TurnMotor_EncodesTachoLimitInLittleEndian()
         {
             var transport = new FakeTransport();

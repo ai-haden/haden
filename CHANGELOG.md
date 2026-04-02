@@ -10,14 +10,18 @@ All notable fixes in this repository should be documented here.
 ### Fixed
 - `Haden.RobotBehavior/PeakLightSteeringPolicy.cs`
 - `Haden.RobotBehavior/LightSignalSmoother.cs`
+- `Haden.RobotBehavior/LightSeekRewardSignal.cs`
+- `Haden.NxtSDK/NxtBrickClient.cs`
 - `Haden.HardwareSmoke/Program.cs`
 - `Haden.Simulation/PeakLightTrialSimulation.cs`
 - `Haden.ConsoleTests/LightSignalSmootherTests.cs`
+- `Haden.ConsoleTests/LightSeekRewardSignalTests.cs`
+- `Haden.ConsoleTests/NxtSdkProtocolTests.cs`
 - `Haden.ConsoleTests/PeakLightSteeringPolicyTests.cs`
 - `Haden.ConsoleTests/PeakLightTrialSimulationTests.cs`
 - `README.md`
-  - Bug: live seek mode only rotated a single motor and did not coordinate sensor scanning with differential wheel steering to drive toward peak light.
-  - Behavior change: introduced a Linux-first peak-light steering policy that uses motor A scan direction/delta to command wheel motors B/C, added deterministic simulation metrics (time-to-peak/stability/recovery), covered the behavior with regression tests, documented runtime tuning/env controls for hardware runs, and added steering/scan polarity switches plus rolling-average sensor smoothing for real-hardware noise and wiring-orientation mismatches.
+  - Bug: live seek episodes used arbitrary iteration cutoffs and had no bump-sensor terminal condition, reducing autonomous goal detection and weakening RL-style reward semantics.
+  - Behavior change: added NXT touch-sensor reads and bump-driven episode termination, introduced explicit step reward shaping and trajectory logging (`sensorRaw/sensorSmooth/delta/reward/bump`), kept `HADEN_SEEK_MAX_ITERATIONS` as safety fallback, and documented bump-sensor runtime controls.
 - `Haden.RobotBehavior/LegacyAutonomousLightSeekEngine.cs`
 - `Haden.ConsoleTests/LegacyAutonomousLightSeekEngineTests.cs`
 - `Haden.HardwareSmoke/Haden.HardwareSmoke.csproj`

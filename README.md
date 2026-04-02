@@ -75,6 +75,11 @@ string html = tree.ToHtmlTree();
 - Default command: `dotnet run --project Haden.HardwareSmoke/Haden.HardwareSmoke.csproj`
 - Auto-connect source order: command arg path -> `HADEN_NXT_PORT` -> `/dev/rfcomm0`
 - Detailed pairing/connectivity guide: `NXTRobot Setup.md`
+- Peak-light steering mode (sensor motor A + wheel motors B/C):
+  - `dotnet run --project Haden.HardwareSmoke/Haden.HardwareSmoke.csproj -- --seek-max-light`
+  - Defaults: `HADEN_LIGHT_SCAN_MOTOR_PORT=0` (A), `HADEN_LEFT_WHEEL_MOTOR_PORT=1` (B), `HADEN_RIGHT_WHEEL_MOTOR_PORT=2` (C)
+  - Control tuning: `HADEN_SCAN_POWER`, `HADEN_SCAN_DEGREES_MIN`, `HADEN_SCAN_DEGREES_MAX`, `HADEN_SCAN_DEGREES_STEP`, `HADEN_WHEEL_BASE_POWER`, `HADEN_WHEEL_MAX_POWER`, `HADEN_WHEEL_TURN_GAIN`, `HADEN_WHEEL_TURN_FLOOR`, `HADEN_SEEK_DELTA_DEADBAND`, `HADEN_PEAK_TOLERANCE`, `HADEN_WHEEL_STEP_DEGREES`
+  - Steering polarity and signal conditioning: `HADEN_STEER_INVERT` (`0`/`1`), `HADEN_SCAN_INVERT` (`0`/`1`), `HADEN_LIGHT_SMOOTH_WINDOW` (`1-10`, default `3`)
 
 ## Linux Robot Behavior
 

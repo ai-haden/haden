@@ -78,6 +78,33 @@ namespace Haden.HardwareSmoke
             return defaultValue;
         }
 
+        private static bool ReadBoolEnv(string name, bool defaultValue = false)
+        {
+            string raw = Environment.GetEnvironmentVariable(name);
+            if (string.IsNullOrWhiteSpace(raw))
+            {
+                return defaultValue;
+            }
+
+            raw = raw.Trim();
+            if (raw == "1")
+            {
+                return true;
+            }
+
+            if (raw == "0")
+            {
+                return false;
+            }
+
+            if (bool.TryParse(raw, out bool parsed))
+            {
+                return parsed;
+            }
+
+            return defaultValue;
+        }
+
         private static bool HasFlag(string[] args, string flag)
         {
             if (args == null)
@@ -102,49 +129,76 @@ namespace Haden.HardwareSmoke
             Console.WriteLine("Connected to NXT. Battery mV: " + battery);
 
             NxtSensorPort sensorPort = ReadSensorPortEnv("HADEN_LIGHT_SENSOR_PORT", NxtSensorPort.Port3);
-            NxtMotorPort motorPort = ReadMotorPortEnv("HADEN_LIGHT_SEEK_MOTOR_PORT", NxtMotorPort.PortA);
-            int iterations = ReadIntEnv("HADEN_SEEK_ITERATIONS", 20);
-            int power = ReadIntEnv("HADEN_SEEK_POWER", 25);
-            int degrees = ReadIntEnv("HADEN_SEEK_DEGREES", 30);
-            int settleDelayMs = ReadIntEnv("HADEN_SEEK_SETTLE_DELAY_MS", 700);
-            bool activeLight = ReadIntEnv("HADEN_LIGHT_SENSOR_ACTIVE", 0) == 1;
+            NxtMotorPort scanMotorPort = ReadMotorPortEnv("HADEN_LIGHT_SCAN_MOTOR_PORT", NxtMotorPort.PortA);
+            NxtMotorPort leftWheelPort = ReadMotorPortEnv("HADEN_LEFT_WHEEL_MOTOR_PORT", NxtMotorPort.PortB);
+            NxtMotorPort rightWheelPort = ReadMotorPortEnv("HADEN_RIGHT_WHEEL_MOTOR_PORT", NxtMotorPort.PortC);
 
-            var engine = new LegacyAutonomousLightSeekEngine();
+            int iterations = ReadIntEnv("HADEN_SEEK_ITERATIONS", 30);
+            int settleDelayMs = ReadIntEnv("HADEN_SEEK_SETTLE_DELAY_MS", 600);
+            bool activeLight = ReadIntEnv("HADEN_LIGHT_SENSOR_ACTIVE", 0) == 1;
+            int wheelStepDegrees = ReadIntEnv("HADEN_WHEEL_STEP_DEGREES", 35);
+            bool steerInvert = ReadBoolEnv("HADEN_STEER_INVERT", false);
+            bool scanInvert = ReadBoolEnv("HADEN_SCAN_INVERT", false);
+            int smoothWindow = Math.Clamp(ReadIntEnv("HADEN_LIGHT_SMOOTH_WINDOW", 3), 1, 10);
+            var smoother = new LightSignalSmoother(smoothWindow);
+
+            var policy = new PeakLightSteeringPolicy(
+                scanMotorPower: ReadIntEnv("HADEN_SCAN_POWER", 18),
+                scanDegreesMin: ReadIntEnv("HADEN_SCAN_DEGREES_MIN", 10),
+                scanDegreesMax: ReadIntEnv("HADEN_SCAN_DEGREES_MAX", 35),
+                scanDegreesStep: ReadIntEnv("HADEN_SCAN_DEGREES_STEP", 5),
+                wheelBasePower: ReadIntEnv("HADEN_WHEEL_BASE_POWER", 35),
+                wheelMaxPower: ReadIntEnv("HADEN_WHEEL_MAX_POWER", 70),
+                wheelTurnGain: ReadIntEnv("HADEN_WHEEL_TURN_GAIN", 2),
+                wheelTurnFloor: ReadIntEnv("HADEN_WHEEL_TURN_FLOOR", 6),
+                deltaDeadband: ReadIntEnv("HADEN_SEEK_DELTA_DEADBAND", 2),
+                peakTolerance: ReadIntEnv("HADEN_PEAK_TOLERANCE", 2));
+
             Console.WriteLine(
                 "Seek setup: sensor=" + sensorPort +
-                ", motor=" + motorPort +
+                ", scanMotor=" + scanMotorPort +
+                ", leftWheel=" + leftWheelPort +
+                ", rightWheel=" + rightWheelPort +
                 ", iterations=" + iterations +
-                ", power=" + power +
-                ", degrees=" + degrees +
-                ", active=" + activeLight);
+                ", wheelStepDegrees=" + wheelStepDegrees +
+                ", active=" + activeLight +
+                ", smoothWindow=" + smoothWindow +
+                ", steerInvert=" + steerInvert +
+                ", scanInvert=" + scanInvert);
 
             for (int i = 0; i < iterations; i++)
             {
-                int sensor = client.ReadLightSensorValue(sensorPort, activeLight);
-                LegacyAutonomousLightSeekStep step = engine.Step(sensor);
+                int rawSensor = client.ReadLightSensorValue(sensorPort, activeLight);
+                int smoothedSensor = smoother.AddSample(rawSensor);
+                PeakLightSteeringStep step = policy.Advance(smoothedSensor);
 
-                int speed = 0;
-                if (step.Turn == TurnDirection.Left)
+                int scanMotorPower = scanInvert ? -step.ScanMotorPower : step.ScanMotorPower;
+                int leftWheelPower = step.LeftWheelPower;
+                int rightWheelPower = step.RightWheelPower;
+
+                if (steerInvert)
                 {
-                    speed = Math.Abs(power);
-                }
-                else if (step.Turn == TurnDirection.Right)
-                {
-                    speed = -Math.Abs(power);
+                    int swap = leftWheelPower;
+                    leftWheelPower = rightWheelPower;
+                    rightWheelPower = swap;
                 }
 
-                if (speed != 0)
-                {
-                    client.TurnMotor(motorPort, speed, Math.Abs(degrees));
-                }
+                client.TurnMotor(scanMotorPort, scanMotorPower, Math.Abs(step.ScanDegrees));
+                client.TurnMotor(leftWheelPort, leftWheelPower, Math.Abs(wheelStepDegrees));
+                client.TurnMotor(rightWheelPort, rightWheelPower, Math.Abs(wheelStepDegrees));
 
                 Console.WriteLine(
                     "iter=" + i +
-                    " sensor=" + sensor +
-                    " turn=" + step.Turn +
-                    " current=" + step.CurrentValue +
+                    " sensorRaw=" + rawSensor +
+                    " sensorSmooth=" + smoothedSensor +
+                    " delta=" + step.Delta +
                     " peak=" + step.PeakLightValue +
-                    " reward=" + step.Reward);
+                    " stableTicks=" + step.PeakStableTicks +
+                    " recoveries=" + step.RecoveryEvents +
+                    " scanDir=" + step.ScanDirection +
+                    " scanPwr=" + scanMotorPower +
+                    " leftPwr=" + leftWheelPower +
+                    " rightPwr=" + rightWheelPower);
 
                 client.KeepAlive();
                 if (settleDelayMs > 0)
@@ -153,7 +207,9 @@ namespace Haden.HardwareSmoke
                 }
             }
 
-            client.BrakeMotor(motorPort);
+            client.BrakeMotor(scanMotorPort);
+            client.BrakeMotor(leftWheelPort);
+            client.BrakeMotor(rightWheelPort);
             Console.WriteLine("Seek complete.");
         }
 

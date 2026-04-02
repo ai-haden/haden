@@ -29,7 +29,11 @@ All notable fixes in this repository should be documented here.
 - `Haden.HardwareSmoke/Program.cs`
 - `README.md`
   - Bug: scan centering could start from an arbitrary cocked end and stop off-midpoint, biasing initial light readings and steering.
-  - Behavior change: replaced centering with a 3-phase end-stop homing sequence (home -> opposite end -> midpoint) and added explicit centering controls (`HADEN_CENTER_HOME_DEGREES`, `HADEN_CENTER_SETTLE_MS`).
+  - Behavior change: replaced centering with full-range CW/CCW sweep calibration (home -> reset motor position -> stepwise opposite sweep until travel stagnation -> midpoint from measured full travel), added centering polarity/disable controls (`HADEN_CENTER_INVERT`, `HADEN_CENTER_DISABLE`) plus sweep controls, and added rotation telemetry (`rotBefore`, `rotAfterReset`, `rotAfterOpposite`, `fullTravel`, `rotAfterCenter`) for verification.
+- `Haden.HardwareSmoke/Program.cs`
+- `README.md`
+  - Bug: naming mixed global light-seeking experiment semantics with scan-head setup/calibration semantics, causing operator confusion.
+  - Behavior change: introduced explicit scan-head homing naming (`--home-scan-head`, `HADEN_SCAN_HOME_*`) while keeping legacy `--center-only` and `HADEN_CENTER_*` as backward-compatible aliases.
 - `Haden.RobotBehavior/LegacyAutonomousLightSeekEngine.cs`
 - `Haden.ConsoleTests/LegacyAutonomousLightSeekEngineTests.cs`
 - `Haden.HardwareSmoke/Haden.HardwareSmoke.csproj`

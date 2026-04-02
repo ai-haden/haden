@@ -77,13 +77,16 @@ string html = tree.ToHtmlTree();
 - Detailed pairing/connectivity guide: `NXTRobot Setup.md`
 - Peak-light steering mode (sensor motor A + wheel motors B/C):
   - `dotnet run --project Haden.HardwareSmoke/Haden.HardwareSmoke.csproj -- --seek-max-light`
+  - Scan-head homing mode: `dotnet run --project Haden.HardwareSmoke/Haden.HardwareSmoke.csproj -- --home-scan-head`
   - Scorecard report mode: `dotnet run --project Haden.HardwareSmoke/Haden.HardwareSmoke.csproj -- --scorecard`
   - Episode termination: front bump sensor trigger (primary), with `HADEN_SEEK_MAX_ITERATIONS` safety cutoff.
   - Defaults: `HADEN_LIGHT_SCAN_MOTOR_PORT=0` (A), `HADEN_LEFT_WHEEL_MOTOR_PORT=1` (B), `HADEN_RIGHT_WHEEL_MOTOR_PORT=2` (C)
   - Control tuning: `HADEN_SCAN_POWER`, `HADEN_SCAN_DEGREES_MIN`, `HADEN_SCAN_DEGREES_MAX`, `HADEN_SCAN_DEGREES_STEP`, `HADEN_WHEEL_BASE_POWER`, `HADEN_WHEEL_MAX_POWER`, `HADEN_WHEEL_TURN_GAIN`, `HADEN_WHEEL_TURN_FLOOR`, `HADEN_SEEK_DELTA_DEADBAND`, `HADEN_PEAK_TOLERANCE`, `HADEN_WHEEL_STEP_DEGREES`
   - Steering polarity and signal conditioning: `HADEN_STEER_INVERT` (`0`/`1`), `HADEN_SCAN_INVERT` (`0`/`1`), `HADEN_LIGHT_SMOOTH_WINDOW` (`1-10`, default `3`)
   - Bump-sensor control: `HADEN_BUMP_SENSOR_PORT` (default `1`), `HADEN_BUMP_ACTIVE_LOW` (`0`/`1`)
-  - Start-of-run centering: `HADEN_CENTER_SCAN_ON_START` (`0`/`1`, default `1`), `HADEN_CENTER_HOME_DEGREES` (default `180`), `HADEN_CENTER_POWER` (default `22`), `HADEN_CENTER_SETTLE_MS` (default `250`)
+  - Start-of-run scan-head homing: `HADEN_SCAN_HOME_ENABLE` (`0`/`1`, default `1`), `HADEN_SCAN_HOME_DISABLE` (`0`/`1`, default `0`), `HADEN_SCAN_HOME_INVERT` (`0`/`1`, default `0`), `HADEN_SCAN_HOME_POWER` (default `22`), `HADEN_SCAN_HOME_SETTLE_MS` (default `250`), `HADEN_SCAN_HOME_MAX_SWEEP_DEGREES` (default `1080`), `HADEN_SCAN_HOME_SWEEP_STEP_DEGREES` (default `40`), `HADEN_SCAN_HOME_STAGNANT_STEPS` (default `3`)
+  - Homing method: full-range sweep calibration: home CW -> reset tacho -> stepwise sweep CCW until travel stagnates -> derive midpoint from measured full travel (`rotBefore/rotAfterReset/rotAfterOpposite/fullTravel/rotAfterCenter` logs)
+  - Backward compatibility: legacy centering env names (`HADEN_CENTER_*`) and `--center-only` are still accepted as aliases.
   - SQLite persistence: `HADEN_RL_DB_PATH` (default `output/haden-rl.db`)
   - Stored tables: `experiment_session`, `experiment_step`, `rl_point`, `rl_scorecard`
 

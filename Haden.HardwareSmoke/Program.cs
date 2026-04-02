@@ -10,6 +10,7 @@ namespace Haden.HardwareSmoke
         private static int Main(string[] args)
         {
             bool seekMaxLightMode = HasFlag(args, "--seek-max-light");
+            bool homeScanHeadMode = HasFlag(args, "--home-scan-head") || HasFlag(args, "--center-only");
             bool scorecardMode = HasFlag(args, "--scorecard");
             string port = ResolvePort(args);
             int retries = ReadIntEnv("HADEN_AUTOCONNECT_RETRIES", 5);
@@ -31,7 +32,11 @@ namespace Haden.HardwareSmoke
                 using var client = new NxtBrickClient(port);
                 client.ConnectWithRetry(retries, delayMs);
                 client.KeepAlive();
-                if (seekMaxLightMode)
+                if (homeScanHeadMode)
+                {
+                    RunHomeScanHead(client);
+                }
+                else if (seekMaxLightMode)
                 {
                     RunSeekMaxLight(client);
                 }
@@ -149,10 +154,14 @@ namespace Haden.HardwareSmoke
             int wheelStepDegrees = ReadIntEnv("HADEN_WHEEL_STEP_DEGREES", 35);
             bool steerInvert = ReadBoolEnv("HADEN_STEER_INVERT", false);
             bool scanInvert = ReadBoolEnv("HADEN_SCAN_INVERT", false);
-            bool centerScanOnStart = ReadBoolEnv("HADEN_CENTER_SCAN_ON_START", true);
-            int centerHomeDegrees = ReadIntEnv("HADEN_CENTER_HOME_DEGREES", 180);
-            int centerPower = ReadIntEnv("HADEN_CENTER_POWER", 22);
-            int centerSettleMs = ReadIntEnv("HADEN_CENTER_SETTLE_MS", 250);
+            bool scanHomeEnable = ReadBoolEnvAlias("HADEN_SCAN_HOME_ENABLE", "HADEN_CENTER_SCAN_ON_START", true);
+            bool scanHomeDisable = ReadBoolEnvAlias("HADEN_SCAN_HOME_DISABLE", "HADEN_CENTER_DISABLE", false);
+            bool scanHomeInvert = ReadBoolEnvAlias("HADEN_SCAN_HOME_INVERT", "HADEN_CENTER_INVERT", false);
+            int scanHomePower = ReadIntEnvAlias("HADEN_SCAN_HOME_POWER", "HADEN_CENTER_POWER", 22);
+            int scanHomeSettleMs = ReadIntEnvAlias("HADEN_SCAN_HOME_SETTLE_MS", "HADEN_CENTER_SETTLE_MS", 250);
+            int scanHomeMaxSweepDegrees = ReadIntEnvAlias("HADEN_SCAN_HOME_MAX_SWEEP_DEGREES", "HADEN_CENTER_MAX_SWEEP_DEGREES", 1080);
+            int scanHomeSweepStepDegrees = ReadIntEnvAlias("HADEN_SCAN_HOME_SWEEP_STEP_DEGREES", "HADEN_CENTER_SWEEP_STEP_DEGREES", 40);
+            int scanHomeStagnantSteps = ReadIntEnvAlias("HADEN_SCAN_HOME_STAGNANT_STEPS", "HADEN_CENTER_STAGNANT_STEPS", 3);
             int smoothWindow = Math.Clamp(ReadIntEnv("HADEN_LIGHT_SMOOTH_WINDOW", 3), 1, 10);
             string databasePath = ReadStringEnv("HADEN_RL_DB_PATH", "output/haden-rl.db");
             var smoother = new LightSignalSmoother(smoothWindow);
@@ -181,7 +190,9 @@ namespace Haden.HardwareSmoke
                 ", wheelStepDegrees=" + wheelStepDegrees +
                 ", active=" + activeLight +
                 ", bumpActiveLow=" + bumpActiveLow +
-                ", centerScanOnStart=" + centerScanOnStart +
+                ", scanHomeEnable=" + scanHomeEnable +
+                ", scanHomeDisable=" + scanHomeDisable +
+                ", scanHomeInvert=" + scanHomeInvert +
                 ", smoothWindow=" + smoothWindow +
                 ", steerInvert=" + steerInvert +
                 ", scanInvert=" + scanInvert +
@@ -190,9 +201,23 @@ namespace Haden.HardwareSmoke
                 "Scorecard loaded: entries=" + summary.Entries +
                 ", avgConfidence=" + summary.AverageConfidence.ToString("0.000", System.Globalization.CultureInfo.InvariantCulture));
 
-            if (centerScanOnStart)
+            if (scanHomeEnable && !scanHomeDisable)
             {
-                CenterScanMotorAtStart(client, scanMotorPort, centerHomeDegrees, centerPower, centerSettleMs);
+                HomeScanHeadAtStart(
+                    client,
+                    scanMotorPort,
+                    scanHomePower,
+                    scanHomeSettleMs,
+                    scanHomeInvert,
+                    scanHomeMaxSweepDegrees,
+                    scanHomeSweepStepDegrees,
+                    scanHomeStagnantSteps);
+            }
+
+            if (maxIterations == 0)
+            {
+                Console.WriteLine("Seek loop skipped: HADEN_SEEK_MAX_ITERATIONS=0 (scan-home-only semantics).");
+                return;
             }
 
             int completedIterations = 0;
@@ -318,6 +343,44 @@ namespace Haden.HardwareSmoke
                 ", elapsedSec=" + elapsedSeconds.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture));
         }
 
+        private static void RunHomeScanHead(NxtBrickClient client)
+        {
+            int battery = client.GetBatteryLevel();
+            Console.WriteLine("Connected to NXT. Battery mV: " + battery);
+
+            NxtMotorPort scanMotorPort = ReadMotorPortEnv("HADEN_LIGHT_SCAN_MOTOR_PORT", NxtMotorPort.PortA);
+            bool scanHomeEnable = ReadBoolEnvAlias("HADEN_SCAN_HOME_ENABLE", "HADEN_CENTER_SCAN_ON_START", true);
+            bool scanHomeDisable = ReadBoolEnvAlias("HADEN_SCAN_HOME_DISABLE", "HADEN_CENTER_DISABLE", false);
+            bool scanHomeInvert = ReadBoolEnvAlias("HADEN_SCAN_HOME_INVERT", "HADEN_CENTER_INVERT", false);
+            int scanHomePower = ReadIntEnvAlias("HADEN_SCAN_HOME_POWER", "HADEN_CENTER_POWER", 22);
+            int scanHomeSettleMs = ReadIntEnvAlias("HADEN_SCAN_HOME_SETTLE_MS", "HADEN_CENTER_SETTLE_MS", 250);
+            int scanHomeMaxSweepDegrees = ReadIntEnvAlias("HADEN_SCAN_HOME_MAX_SWEEP_DEGREES", "HADEN_CENTER_MAX_SWEEP_DEGREES", 1080);
+            int scanHomeSweepStepDegrees = ReadIntEnvAlias("HADEN_SCAN_HOME_SWEEP_STEP_DEGREES", "HADEN_CENTER_SWEEP_STEP_DEGREES", 40);
+            int scanHomeStagnantSteps = ReadIntEnvAlias("HADEN_SCAN_HOME_STAGNANT_STEPS", "HADEN_CENTER_STAGNANT_STEPS", 3);
+
+            Console.WriteLine(
+                "Home-scan-head setup: scanMotor=" + scanMotorPort +
+                ", scanHomeEnable=" + scanHomeEnable +
+                ", scanHomeDisable=" + scanHomeDisable +
+                ", scanHomeInvert=" + scanHomeInvert);
+
+            if (scanHomeEnable && !scanHomeDisable)
+            {
+                HomeScanHeadAtStart(
+                    client,
+                    scanMotorPort,
+                    scanHomePower,
+                    scanHomeSettleMs,
+                    scanHomeInvert,
+                    scanHomeMaxSweepDegrees,
+                    scanHomeSweepStepDegrees,
+                    scanHomeStagnantSteps);
+            }
+
+            client.BrakeMotor(scanMotorPort);
+            Console.WriteLine("Home-scan-head complete.");
+        }
+
         private static bool ReadBumpPressed(NxtBrickClient client, NxtSensorPort bumpSensorPort, bool activeLow)
         {
             bool pressed = client.ReadTouchSensorPressed(bumpSensorPort);
@@ -342,35 +405,93 @@ namespace Haden.HardwareSmoke
             return "scan:" + scan + ";steer:" + steer + ";mag:" + magnitude;
         }
 
-        private static void CenterScanMotorAtStart(
+        private static void HomeScanHeadAtStart(
             NxtBrickClient client,
             NxtMotorPort scanMotorPort,
-            int homeDegrees,
             int power,
-            int settleMs)
+            int settleMs,
+            bool invert,
+            int maxSweepDegrees,
+            int sweepStepDegrees,
+            int stagnantSteps)
         {
-            int safeHome = Math.Clamp(homeDegrees, 30, 360);
             int safePower = Math.Clamp(power, 5, 70);
             int settle = Math.Clamp(settleMs, 50, 5000);
+            int safeMaxSweep = Math.Clamp(maxSweepDegrees, 180, 4000);
+            int safeStep = Math.Clamp(sweepStepDegrees, 10, 180);
+            int safeStagnant = Math.Clamp(stagnantSteps, 1, 8);
+            int cwDirection = invert ? 1 : -1;
+            int ccwDirection = -cwDirection;
 
+            NxtGetOutputState before = client.GetOutputState(scanMotorPort);
             Console.WriteLine(
-                "Centering scan motor: homeDegrees=" + safeHome +
+                "Homing scan head: mode=full-range-sweep" +
                 ", power=" + safePower +
-                ", settleMs=" + settle);
+                ", settleMs=" + settle +
+                ", invert=" + invert +
+                ", maxSweepDegrees=" + safeMaxSweep +
+                ", sweepStepDegrees=" + safeStep +
+                ", rotBefore=" + before.RotationCount);
 
-            // Home to one end-stop.
-            client.TurnMotor(scanMotorPort, -safePower, safeHome);
+            // Phase 1: home to CW end stop.
+            client.TurnMotor(scanMotorPort, cwDirection * safePower, safeMaxSweep);
             System.Threading.Thread.Sleep(settle);
+            client.BrakeMotor(scanMotorPort);
+            System.Threading.Thread.Sleep(Math.Min(250, settle));
+            client.ResetMotorPosition(scanMotorPort, relative: false);
+            NxtGetOutputState afterReset = client.GetOutputState(scanMotorPort);
+            Console.WriteLine("Homing scan head: rotAfterReset=" + afterReset.RotationCount);
 
-            // Sweep to the opposite end-stop.
-            client.TurnMotor(scanMotorPort, safePower, safeHome * 2);
-            System.Threading.Thread.Sleep(settle);
+            // Phase 2: sweep full range toward CCW and detect opposite stop by stagnation.
+            int measuredTravel = 0;
+            int stagnant = 0;
+            int commanded = 0;
+            int previousAbs = 0;
+            while (commanded < safeMaxSweep && stagnant < safeStagnant)
+            {
+                int step = Math.Min(safeStep, safeMaxSweep - commanded);
+                client.TurnMotor(scanMotorPort, ccwDirection * safePower, step);
+                System.Threading.Thread.Sleep(settle);
+                client.BrakeMotor(scanMotorPort);
+                NxtGetOutputState afterOpposite = client.GetOutputState(scanMotorPort);
+                int currentAbs = Math.Abs(afterOpposite.RotationCount);
+                measuredTravel = currentAbs;
+                commanded += step;
 
-            // Return half-range to approximate midpoint.
-            client.TurnMotor(scanMotorPort, -safePower, safeHome);
+                if (currentAbs <= previousAbs + 2)
+                {
+                    stagnant++;
+                }
+                else
+                {
+                    stagnant = 0;
+                }
+
+                previousAbs = Math.Max(previousAbs, currentAbs);
+                Console.WriteLine(
+                    "Homing scan head: sweepCommanded=" + commanded +
+                    ", rotAfterOpposite=" + afterOpposite.RotationCount +
+                    ", stagnant=" + stagnant);
+            }
+
+            if (Math.Abs(measuredTravel) < 20)
+            {
+                Console.WriteLine("Homing scan head: insufficient travel detected; leaving motor at current position.");
+                client.BrakeMotor(scanMotorPort);
+                return;
+            }
+
+            // Phase 3: return half the measured travel to midpoint.
+            int midpointDegrees = Math.Max(10, measuredTravel / 2);
+            client.TurnMotor(scanMotorPort, cwDirection * safePower, midpointDegrees);
             System.Threading.Thread.Sleep(settle);
 
             client.BrakeMotor(scanMotorPort);
+            NxtGetOutputState afterCenter = client.GetOutputState(scanMotorPort);
+            Console.WriteLine(
+                "Homing scan head: fullTravel=" + measuredTravel +
+                ", centerTarget=" + midpointDegrees +
+                ", rotAfterCenter=" + afterCenter.RotationCount);
         }
 
         private static void PrintScorecard()
@@ -454,6 +575,32 @@ namespace Haden.HardwareSmoke
         {
             string raw = Environment.GetEnvironmentVariable(name);
             return string.IsNullOrWhiteSpace(raw) ? defaultValue : raw.Trim();
+        }
+
+        private static int ReadIntEnvAlias(string primaryName, string legacyName, int defaultValue)
+        {
+            if (HasEnvValue(primaryName))
+            {
+                return ReadIntEnv(primaryName, defaultValue);
+            }
+
+            return ReadIntEnv(legacyName, defaultValue);
+        }
+
+        private static bool ReadBoolEnvAlias(string primaryName, string legacyName, bool defaultValue)
+        {
+            if (HasEnvValue(primaryName))
+            {
+                return ReadBoolEnv(primaryName, defaultValue);
+            }
+
+            return ReadBoolEnv(legacyName, defaultValue);
+        }
+
+        private static bool HasEnvValue(string name)
+        {
+            string raw = Environment.GetEnvironmentVariable(name);
+            return !string.IsNullOrWhiteSpace(raw);
         }
     }
 }

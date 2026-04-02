@@ -492,4 +492,15 @@ Project notes and thoughts for Haden controller, an autonomous search program ex
 	1317: Seek maximum light value test coming soon.
 	1405: Sanity test check is successful.
 	1407: Start testing day with both Bluetooth enabled and run: sudo rfcomm connect /dev/rfcomm0 00:16:53:17:9B:47 1
+02.04.2026
+	1541: Boards and bear and back here.
+	1542: Will develop the real model this session.
+	1604: Steering is working.
+	1609: Adding the bump sensor to reinforce machine independence and not arbitrarily ending the experiment. This so the reward function is genuine.
+	1614: Completed. Now a scorecard system to document RL outcomes.
+	1623: Centering the light sensor on start since most times skewed.
+	1652: Getting syntactical naming of global behavior verses motor calibration concerns.
+	1707: Finally at the meat so can segue to the paper, but running out of context. Oh, there it goes.
+	1719: Defining synthetic pathological behavior - banging against a full scan direction rather than changing direction.
+	1730: A focused policy? Will get into it another time.
 	

@@ -503,4 +503,6 @@ Project notes and thoughts for Haden controller, an autonomous search program ex
 	1707: Finally at the meat so can segue to the paper, but running out of context. Oh, there it goes.
 	1719: Defining synthetic pathological behavior - banging against a full scan direction rather than changing direction.
 	1730: A focused policy? Will get into it another time.
+	1740: Cleaning up the pathology. And humming.
+	1744: Setting the next collaboration prompt.
 	

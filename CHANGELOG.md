@@ -8,6 +8,11 @@ All notable fixes in this repository should be documented here.
 - Established changelog workflow for tracking code fixes over time.
 
 ### Changed
+- `Haden.ConsoleTests/Haden.ConsoleTests.csproj`
+- `Haden.NxtSDK/Haden.NxtSDK.csproj`
+- `Haden.HardwareSmoke/Haden.HardwareSmoke.csproj`
+  - Bug: direct dependencies kept vulnerable and outdated SQLite, serial-port, and test packages in the .NET 10 solution.
+  - Behavior change: upgraded every direct package reference to its current stable version, including `Microsoft.Data.Sqlite` 11.0.0, `System.IO.Ports` 11.0.0, `Microsoft.NET.Test.Sdk` 18.12.0, NUnit 5.0.0, and NUnit3TestAdapter 6.3.1.
 - `global.json`
 - `Haden.Library/Haden.Library.csproj`
 - `Haden.ConsoleTests/Haden.ConsoleTests.csproj`

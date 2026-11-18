@@ -7,6 +7,17 @@ All notable fixes in this repository should be documented here.
 ### Added
 - Established changelog workflow for tracking code fixes over time.
 
+### Changed
+- `global.json`
+- `Haden.Library/Haden.Library.csproj`
+- `Haden.ConsoleTests/Haden.ConsoleTests.csproj`
+- `Haden.NxtSDK/Haden.NxtSDK.csproj`
+- `Haden.RobotBehavior/Haden.RobotBehavior.csproj`
+- `Haden.Simulation/Haden.Simulation.csproj`
+- `Haden.LinuxMigrationReview/Haden.LinuxMigrationReview.csproj`
+  - Bug: the repository pinned an unavailable .NET 9 SDK and targeted an older runtime, preventing the installed .NET 10 SDK from building the solution.
+  - Behavior change: the SDK pin is now `10.0.404` and every active project targets `net10.0`.
+
 ### Fixed
 - `Haden.ConsoleTests/Haden.ConsoleTests.csproj`
 - `Haden.ConsoleTests/Branch12ConsoleTests.cs`

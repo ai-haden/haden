@@ -15,6 +15,7 @@ All notable fixes in this repository should be documented here.
 - `Haden.RobotBehavior/Haden.RobotBehavior.csproj`
 - `Haden.Simulation/Haden.Simulation.csproj`
 - `Haden.LinuxMigrationReview/Haden.LinuxMigrationReview.csproj`
+- `Haden.HardwareSmoke/Haden.HardwareSmoke.csproj`
   - Bug: the repository pinned an unavailable .NET 9 SDK and targeted an older runtime, preventing the installed .NET 10 SDK from building the solution.
   - Behavior change: the SDK pin is now `10.0.404` and every active project targets `net10.0`.
 

@@ -487,9 +487,6 @@ Project notes and thoughts for Haden controller, an autonomous search program ex
 	839: Getting today's load started.
 	959: Issues getting things working as I see Windows platform being made totally useless. Probably the intention.
 	1009: Need to migrate to linux but this will take some work.
-18.11.2026
-	1238: Reactivating this project since I have a bluetooth solution.
-
 	1200: Linux baseline is ready to return when I replace the brick.
 	1312: New brick-enabled robot is ready for linux testing.
 	1317: Seek maximum light value test coming soon.
@@ -508,4 +505,6 @@ Project notes and thoughts for Haden controller, an autonomous search program ex
 	1730: A focused policy? Will get into it another time.
 	1740: Cleaning up the pathology. And humming.
 	1744: Setting the next collaboration prompt.
-	
+18.11.2026
+	1238: Reactivating this project since I have a bluetooth solution.
+

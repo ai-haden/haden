@@ -487,4 +487,6 @@ Project notes and thoughts for Haden controller, an autonomous search program ex
 	839: Getting today's load started.
 	959: Issues getting things working as I see Windows platform being made totally useless. Probably the intention.
 	1009: Need to migrate to linux but this will take some work.
+18.11.2026
+	1238: Reactivating this project since I have a bluetooth solution.
 	

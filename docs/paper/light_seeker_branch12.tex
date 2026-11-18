@@ -77,3 +77,59 @@ For paper reporting, this supports a methods section that cleanly separates:
 \item implementation (state variables and update equations), and
 \item evaluation (trace-level behavioral criteria and mission outcomes).
 \end{enumerate}
+
+\subsection{Live Robot Seek-Max-Light Test Protocol}
+\label{sec:live_seek_max_light_protocol}
+
+\textbf{Objective.}
+Validate that the migrated Linux autonomy routine preserves the latest legacy behavior while physically orienting the NXT toward increasing light intensity.
+
+\textbf{System under test.}
+\begin{itemize}
+\item decision engine: \texttt{Haden.RobotBehavior/LegacyAutonomousLightSeekEngine.cs};
+\item live runner: \texttt{Haden.HardwareSmoke} in \texttt{--seek-max-light} mode;
+\item transport: Bluetooth RFCOMM (default \texttt{/dev/rfcomm0}).
+\end{itemize}
+
+\textbf{Hardware and environment.}
+\begin{enumerate}
+\item LEGO NXT brick paired with Linux host;
+\item light sensor connected to configured input port (default Port 3);
+\item seek motor connected to configured output port (default Port A);
+\item single fixed light source in controlled ambient illumination.
+\end{enumerate}
+
+\textbf{Procedure.}
+For each iteration $t \in \{1,\dots,N\}$:
+\begin{enumerate}
+\item read sensor value $s_t$;
+\item advance legacy autonomous state machine (\texttt{Peek/Compare}-style update);
+\item apply turn command ($\texttt{Left}$ or $\texttt{Right}$) with fixed power and angular step;
+\item wait a fixed settle delay and repeat.
+\end{enumerate}
+After $N$ iterations, brake motor and disconnect.
+
+\textbf{Trace variables.}
+Per iteration, log: sensor reading, chosen turn direction, current value, peak value, and reward counter.
+
+\textbf{Primary evaluation criteria.}
+\begin{enumerate}
+\item peak value increases monotonically or stabilizes near a local maximum;
+\item direction reversal occurs on negative gradient events;
+\item final steady-state reading exceeds initial reading under identical lighting.
+\end{enumerate}
+
+\textbf{Reproducibility controls.}
+Fix source position, ambient light, motor power, turn granularity, and iteration count.
+Repeat across multiple initial headings; report mean and variance of final peak and convergence steps.
+
+\textbf{Reference execution command.}
+\begin{verbatim}
+HADEN_LIGHT_SENSOR_PORT=3 \
+HADEN_LIGHT_SEEK_MOTOR_PORT=0 \
+HADEN_SEEK_ITERATIONS=30 \
+HADEN_SEEK_POWER=25 \
+HADEN_SEEK_DEGREES=30 \
+dotnet run --project Haden.HardwareSmoke/Haden.HardwareSmoke.csproj \
+  -- --seek-max-light /dev/rfcomm0
+\end{verbatim}

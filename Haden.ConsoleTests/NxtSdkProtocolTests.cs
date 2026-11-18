@@ -50,6 +50,44 @@ namespace Haden.ConsoleTests
         }
 
         [Test]
+        public void ReadTouchSensorPressed_SendsSwitchBooleanInputModeAndParsesPress()
+        {
+            var transport = new FakeTransport();
+            transport.EnqueueReply(Packet(0x02, (byte)NxtCommand.SetInputMode, 0x00));
+            transport.EnqueueReply(Packet(
+                0x02,
+                (byte)NxtCommand.GetInputValues,
+                0x00,
+                (byte)NxtSensorPort.Port1,
+                0x01,
+                0x01,
+                (byte)NxtSensorType.Switch,
+                (byte)NxtSensorMode.Boolean,
+                0x00,
+                0x00,
+                0x00,
+                0x00,
+                0x01,
+                0x00,
+                0x00,
+                0x00,
+                0x00));
+
+            var client = new NxtBrickClient(transport);
+            client.Connect();
+
+            bool pressed = client.ReadTouchSensorPressed(NxtSensorPort.Port1);
+
+            Assert.That(pressed, Is.True);
+            Assert.That(transport.Writes.Count, Is.EqualTo(2));
+
+            byte[] setInputMode = transport.Writes[0];
+            Assert.That(setInputMode[4], Is.EqualTo((byte)NxtSensorPort.Port1));
+            Assert.That(setInputMode[5], Is.EqualTo((byte)NxtSensorType.Switch));
+            Assert.That(setInputMode[6], Is.EqualTo((byte)NxtSensorMode.Boolean));
+        }
+
+        [Test]
         public void TurnMotor_EncodesTachoLimitInLittleEndian()
         {
             var transport = new FakeTransport();
@@ -161,6 +199,29 @@ namespace Haden.ConsoleTests
             Assert.That(transport.Writes[2][3], Is.EqualTo((byte)NxtCommand.LsRead));
         }
 
+        [Test]
+        public void ConnectWithRetry_RetriesUntilSuccess()
+        {
+            var transport = new FakeTransport { FailOpenAttempts = 2 };
+            var client = new NxtBrickClient(transport);
+
+            client.ConnectWithRetry(maxAttempts: 3, delayMs: 0);
+
+            Assert.That(transport.OpenCalls, Is.EqualTo(3));
+            Assert.That(client.IsConnected, Is.True);
+        }
+
+        [Test]
+        public void ConnectWithRetry_ThrowsAfterMaxAttempts()
+        {
+            var transport = new FakeTransport { FailOpenAttempts = 5 };
+            var client = new NxtBrickClient(transport);
+
+            Assert.Throws<InvalidOperationException>(
+                () => client.ConnectWithRetry(maxAttempts: 3, delayMs: 0));
+            Assert.That(transport.OpenCalls, Is.EqualTo(3));
+        }
+
         private static byte[] Packet(params byte[] payload)
         {
             var packet = new byte[payload.Length + 2];
@@ -173,15 +234,29 @@ namespace Haden.ConsoleTests
         private sealed class FakeTransport : INxtTransport
         {
             private readonly Queue<byte> _readBytes = new Queue<byte>();
+            private int _remainingOpenFailures;
 
             public List<byte[]> Writes { get; } = new List<byte[]>();
 
             public bool IsOpen { get; private set; }
 
             public int ReadTimeout { get; set; }
+            public int OpenCalls { get; private set; }
+
+            public int FailOpenAttempts
+            {
+                get => _remainingOpenFailures;
+                set => _remainingOpenFailures = value;
+            }
 
             public void Open()
             {
+                OpenCalls++;
+                if (_remainingOpenFailures > 0)
+                {
+                    _remainingOpenFailures--;
+                    throw new InvalidOperationException("Open failed for test.");
+                }
                 IsOpen = true;
             }
 

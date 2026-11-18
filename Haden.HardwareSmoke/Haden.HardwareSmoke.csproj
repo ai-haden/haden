@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <RootNamespace>Haden.HardwareSmoke</RootNamespace>
+    <AssemblyName>Haden.HardwareSmoke</AssemblyName>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Haden.NxtSDK\Haden.NxtSDK.csproj" />
+    <ProjectReference Include="..\Haden.RobotBehavior\Haden.RobotBehavior.csproj" />
+  </ItemGroup>
+</Project>

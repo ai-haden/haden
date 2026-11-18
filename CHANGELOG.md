@@ -19,6 +19,61 @@ All notable fixes in this repository should be documented here.
   - Behavior change: the SDK pin is now `10.0.404` and every active project targets `net10.0`.
 
 ### Fixed
+- `Haden.RobotBehavior/PeakLightSteeringPolicy.cs`
+- `Haden.RobotBehavior/LightSignalSmoother.cs`
+- `Haden.RobotBehavior/LightSeekRewardSignal.cs`
+- `Haden.NxtSDK/NxtBrickClient.cs`
+- `Haden.HardwareSmoke/Program.cs`
+- `Haden.HardwareSmoke/SqliteExperimentStore.cs`
+- `Haden.HardwareSmoke/Haden.HardwareSmoke.csproj`
+- `Haden.Simulation/PeakLightTrialSimulation.cs`
+- `Haden.ConsoleTests/LightSignalSmootherTests.cs`
+- `Haden.ConsoleTests/LightSeekRewardSignalTests.cs`
+- `Haden.ConsoleTests/SqliteExperimentStoreTests.cs`
+- `Haden.ConsoleTests/Haden.ConsoleTests.csproj`
+- `Haden.ConsoleTests/NxtSdkProtocolTests.cs`
+- `Haden.ConsoleTests/PeakLightSteeringPolicyTests.cs`
+- `Haden.ConsoleTests/PeakLightTrialSimulationTests.cs`
+- `README.md`
+  - Bug: live seek episodes used arbitrary iteration cutoffs and had no persistent RL scorecard/session storage, so confidence and reward history could not be carried forward between experiments.
+  - Behavior change: added NXT touch-sensor reads and bump-driven episode termination, introduced explicit step reward shaping and trajectory logging (`sensorRaw/sensorSmooth/delta/reward/bump`), added SQLite-backed persistence for sessions/steps/RL points/scorecard confidence, added `--scorecard` reporting mode, centered the sensor scan motor at experiment start to avoid end-stop bias, kept `HADEN_SEEK_MAX_ITERATIONS` as safety fallback, and documented bump-sensor plus database runtime controls.
+- `Haden.HardwareSmoke/Program.cs`
+- `README.md`
+  - Bug: scan centering could start from an arbitrary cocked end and stop off-midpoint, biasing initial light readings and steering.
+  - Behavior change: replaced centering with full-range CW/CCW sweep calibration (home -> reset motor position -> stepwise opposite sweep until travel stagnation -> midpoint from measured full travel), added centering polarity/disable controls (`HADEN_CENTER_INVERT`, `HADEN_CENTER_DISABLE`) plus sweep controls, and added rotation telemetry (`rotBefore`, `rotAfterReset`, `rotAfterOpposite`, `fullTravel`, `rotAfterCenter`) for verification.
+- `Haden.HardwareSmoke/Program.cs`
+- `README.md`
+  - Bug: naming mixed global light-seeking experiment semantics with scan-head setup/calibration semantics, causing operator confusion.
+  - Behavior change: introduced explicit scan-head homing naming (`--home-scan-head`, `HADEN_SCAN_HOME_*`) while keeping legacy `--center-only` and `HADEN_CENTER_*` as backward-compatible aliases.
+- `Haden.RobotBehavior/LightTripletDecisionPolicy.cs`
+- `Haden.HardwareSmoke/Program.cs`
+- `Haden.ConsoleTests/LightTripletDecisionPolicyTests.cs`
+- `README.md`
+- `docs/paper/seek_triplet_theory.md`
+  - Bug: wheel steering could continue in a largely open-loop pattern without explicitly choosing direction from current environmental light gradients.
+  - Behavior change: replaced per-step steering with probe-based triplet sensing (`left/center/right`) on the scan head, added a dedicated triplet decision policy for wheel commands and contrast confidence, and exposed probe/deadband tuning env controls.
+- `Haden.HardwareSmoke/Program.cs`
+- `README.md`
+- `docs/paper/seek_triplet_theory.md`
+  - Bug: even with triplet probing, the robot could still advance when directional evidence was weak, producing behavior that appeared blind instead of deliberative.
+  - Behavior change: enforced strict evidence-gated locomotion (`sense -> decide -> move`) so wheel motors only actuate when triplet direction and minimum confidence are satisfied; added adaptive probe escalation controls for repeated flat scans and documented theory/metrics for paper extrapolation.
+- `Haden.RobotBehavior/BoredomDirectionPolicy.cs`
+- `Haden.ConsoleTests/BoredomDirectionPolicyTests.cs`
+- `Haden.HardwareSmoke/Program.cs`
+- `README.md`
+- `docs/paper/seek_triplet_theory.md`
+  - Bug: under prolonged uncertainty and flat light values, seek behavior could keep favoring one direction and physically bang the scan head against an end-stop instead of trying the opposite direction.
+  - Behavior change: introduced boredom-cue exploration policy that flips directional bias when uncertain+flat conditions persist and the robot is not near a confirmed peak, added uncertain-step alternation and same-direction stuck forced-flip guards, added exploratory wheel steering in the bias direction, disabled post-decision scan-head nudge by default to avoid repeated end-stop pushes, and documented new controls/telemetry for paper interpretation.
+- `Haden.HardwareSmoke/Program.cs`
+- `README.md`
+  - Bug: motors could remain energized between experiments (audible humming) when runs completed or failed without an explicit global all-stop path.
+  - Behavior change: added best-effort global motor de-power safety handling for ports A/B/C in `finally` flow after hardware modes, and added `--all-stop` mode for manual immediate motor shutdown between experiments.
+- `Haden.RobotBehavior/LegacyAutonomousLightSeekEngine.cs`
+- `Haden.ConsoleTests/LegacyAutonomousLightSeekEngineTests.cs`
+- `Haden.HardwareSmoke/Haden.HardwareSmoke.csproj`
+- `Haden.HardwareSmoke/Program.cs`
+  - Bug: Linux runtime only covered simplified seek/difference logic and did not preserve the richer, latest `HadenManualControl` autonomous light-seek state machine from Windows forms.
+  - Behavior change: added a stateful legacy-autonomy engine (`Peek/Compare` style flow with iteration, peak, reward, and turn memory), regression tests for that flow, and a live Bluetooth `--seek-max-light` mode in `Haden.HardwareSmoke` to execute the migrated logic on real NXT hardware.
 - `Haden.ConsoleTests/Haden.ConsoleTests.csproj`
 - `Haden.ConsoleTests/Branch12ConsoleTests.cs`
 - `Haden.ConsoleTests/RewardConsoleTests.cs`
@@ -32,6 +87,8 @@ All notable fixes in this repository should be documented here.
 - `Haden.NxtSDK/NxtExceptions.cs`
 - `Haden.NxtSDK/NxtPacketCodec.cs`
 - `Haden.NxtSDK/NxtBrickClient.cs`
+- `Haden.HardwareSmoke/Haden.HardwareSmoke.csproj`
+- `Haden.HardwareSmoke/Program.cs`
 - `Haden.RobotBehavior/Haden.RobotBehavior.csproj`
 - `Haden.RobotBehavior/LightSeekBehavior.cs`
 - `Haden.ConsoleTests/RobotBehaviorTests.cs`
@@ -46,7 +103,7 @@ All notable fixes in this repository should be documented here.
 - `NEXT_SESSION_PROMPT.md`
 - `Haden.Tests/HardwareLightSeekingConsoleTests.cs`
   - Bug: recently added light-seeking logic was only present in a Windows-only hardware test path and not isolated for Linux review.
-  - Behavior change: extracted adaptive seek-cycle behavior into a new `net9.0` Linux review library, added Linux console tests for it, removed the Windows-only branch-added test file, removed Windows-only projects from the active solution, introduced a new headless `Haden.NxtSDK` Linux project for NXT serial protocol operations, migrated remaining legacy communicator methods (brick naming, mailbox messaging, low-speed/I2C), extracted non-UI light-seeking decision logic from historical manual/simulator forms into `Haden.RobotBehavior`, added a headless `Haden.Simulation` engine that reuses `Haden.Library.WhirlEngine` for whirl-state progression, added regression tests, removed old Windows-only project directories, and trimmed docs/prompts to Linux-only workflow guidance.
+  - Behavior change: extracted adaptive seek-cycle behavior into a new `net9.0` Linux review library, added Linux console tests for it, removed the Windows-only branch-added test file, removed Windows-only projects from the active solution, introduced a new headless `Haden.NxtSDK` Linux project for NXT serial protocol operations, migrated remaining legacy communicator methods (brick naming, mailbox messaging, low-speed/I2C), added `ConnectWithRetry` for project-level auto-connect, added a runnable `Haden.HardwareSmoke` console project that auto-connects to `/dev/rfcomm0` (or `HADEN_NXT_PORT`) and performs connect/keepalive/battery/disconnect, extracted non-UI light-seeking decision logic from historical manual/simulator forms into `Haden.RobotBehavior`, added a headless `Haden.Simulation` engine that reuses `Haden.Library.WhirlEngine` for whirl-state progression, added regression tests, removed old Windows-only project directories, and trimmed docs/prompts to Linux-only workflow guidance.
 - `global.json`
   - Bug: no SDK pin existed, so local `dotnet` selected `9.0.312`, which failed restore in this environment before tests could execute.
   - Behavior change: pinned SDK to `9.0.100` with roll-forward disabled to force a known-installed SDK for deterministic local build/test runs.
